@@ -1,0 +1,5 @@
+CompileFlags:
+  Add: 
+    - "-IC:/dev/c++proj/DragonFly/includes"
+    - "-IC:/dev/c++proj/DragonFly/build/_deps/raylib-src/src/"
+    - "-std=c++23"
