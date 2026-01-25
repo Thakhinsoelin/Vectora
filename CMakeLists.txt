@@ -41,13 +41,19 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
+FetchContent_Declare(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG v1.17.0 # Use a stable version tag
+    GIT_SHALLOW TRUE
+)
+
 # Disable extras we don't need
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(glfw)
-FetchContent_MakeAvailable(glm)
+FetchContent_MakeAvailable(glfw glm spdlog)
 
 # --- OpenGL ---
 find_package(OpenGL REQUIRED)
@@ -70,10 +76,13 @@ target_include_directories(${V_ENGINE_TARGET} PUBLIC
     ${CMAKE_SOURCE_DIR}/includes
 )
 
+target_compile_definitions(${V_ENGINE_TARGET} PRIVATE V_BUILD_DLL V_PLATFORM_WINDOWS)
+
 # Link libraries
 target_link_libraries(${V_ENGINE_TARGET} PUBLIC
     glfw
     glm::glm
+    spdlog::spdlog
     OpenGL::GL
 )
 
@@ -82,7 +91,7 @@ target_include_directories(${V_EDITOR_TARGET} PRIVATE
     ${CMAKE_SOURCE_DIR}/Vectora_Editor
     ${CMAKE_SOURCE_DIR}/includes
 )
-
+target_compile_definitions(${V_EDITOR_TARGET} PRIVATE V_PLATFORM_WINDOWS)
 target_link_libraries(${V_EDITOR_TARGET} PRIVATE ${V_ENGINE_TARGET})
 
 
