@@ -1,35 +1,93 @@
 cmake_minimum_required(VERSION 3.28)
-project(DragonFly LANGUAGES CXX)
+project(Vectora LANGUAGES CXX)
+set(V_ENGINE_TARGET Vectora_Engine)
+set(V_EDITOR_TARGET Vectora_Editor)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(RAYLIB_VERSION 5.5)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if (WIN32)
+    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(ENGINE_PLATFORM "Win64")
+    else()
+        set(ENGINE_PLATFORM "Win32")
+    endif()
+elseif (APPLE)
+    set(ENGINE_PLATFORM "Mac")
+elseif (UNIX)
+    set(ENGINE_PLATFORM "Linux")
+endif()
+
+foreach(OUTPUTCONFIG Debug Release RelWithDebInfo MinSizeRel)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG}
+        ${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM})
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG}
+        ${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM})
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG}
+        ${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM})
+endforeach()
+
 include(FetchContent)
 FetchContent_Declare(
-    raylib
-    DOWNLOAD_EXTRACT_TIMESTAMP OFF
-    URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
-    GIT_SHALLOW ON
-    FIND_PACKAGE_ARGS
+    glfw
+    GIT_REPOSITORY https://github.com/glfw/glfw.git
+    GIT_TAG 3.3.9
 )
 
-FetchContent_MakeAvailable(raylib)
-
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
-    src/*.cpp
-    src/*.c
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG 1.0.3  # or a newer stable tag if you want
+    GIT_SHALLOW TRUE
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+# Disable extras we don't need
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
-target_include_directories(${PROJECT_NAME} PRIVATE
+FetchContent_MakeAvailable(glfw)
+FetchContent_MakeAvailable(glm)
+
+# --- OpenGL ---
+find_package(OpenGL REQUIRED)
+
+file(GLOB_RECURSE ENGINE CONFIGURE_DEPENDS
+    Vectora_Engine/*.cpp
+    Vectora_Engine/*.c
+)
+
+file(GLOB_RECURSE EDITOR CONFIGURE_DEPENDS
+    Vectora_Editor/*.cpp
+    Vectora_Editor/*.c
+)
+
+add_library(${V_ENGINE_TARGET} SHARED ${ENGINE})
+
+# Include your own headers
+target_include_directories(${V_ENGINE_TARGET} PUBLIC
+    ${CMAKE_SOURCE_DIR}/Vectora_Engine
     ${CMAKE_SOURCE_DIR}/includes
 )
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
-target_link_libraries(${PROJECT_NAME} raylib)
+# Link libraries
+target_link_libraries(${V_ENGINE_TARGET} PUBLIC
+    glfw
+    glm::glm
+    OpenGL::GL
+)
 
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
-add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
-    )
+add_executable(${V_EDITOR_TARGET} ${EDITOR})
+target_include_directories(${V_EDITOR_TARGET} PRIVATE
+    ${CMAKE_SOURCE_DIR}/Vectora_Editor
+    ${CMAKE_SOURCE_DIR}/includes
+)
+
+target_link_libraries(${V_EDITOR_TARGET} PRIVATE ${V_ENGINE_TARGET})
+
+
+
+# add_custom_command(
+#         TARGET ${PROJECT_NAME} POST_BUILD
+#         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
+#     )
