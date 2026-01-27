@@ -61,11 +61,13 @@ find_package(OpenGL REQUIRED)
 file(GLOB_RECURSE ENGINE CONFIGURE_DEPENDS
     Vectora_Engine/*.cpp
     Vectora_Engine/*.c
+    Vectora_Engine/*.h
 )
 
 file(GLOB_RECURSE EDITOR CONFIGURE_DEPENDS
     Vectora_Editor/*.cpp
     Vectora_Editor/*.c
+    Vectora_Editor/*.h
 )
 
 add_library(${V_ENGINE_TARGET} SHARED ${ENGINE})
