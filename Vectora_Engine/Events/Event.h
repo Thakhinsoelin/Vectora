@@ -67,13 +67,14 @@ namespace Vectora {
 	inline std::ostream& operator<<(std::ostream& os, const Event& e) {
 		return os << e.ToString();
 	}
+	template<typename T>
+	concept EventDerived = std::derived_from<std::remove_cvref_t<T>, Event>;
 }
 
 
-template <typename T>
-struct fmt::formatter<T, std::enable_if_t<std::is_base_of<Vectora::Event, T>::value, char>> :
-	fmt::formatter<std::string> {
-	auto format(const Vectora::Event& e, format_context& ctx) const {
+template<Vectora::EventDerived T>
+struct fmt::formatter<T> : fmt::formatter<std::string> {
+	auto format(const Vectora::Event& e, fmt::format_context& ctx) const {
 		return fmt::formatter<std::string>::format(e.ToString(), ctx);
 	}
 };

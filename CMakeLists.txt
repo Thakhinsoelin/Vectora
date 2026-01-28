@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 project(Vectora LANGUAGES CXX)
-set(V_ENGINE_TARGET Vectora_Engine)
-set(V_EDITOR_TARGET Vectora_Editor)
+set(VE_ENGINE_TARGET Vectora_Engine)
+set(VE_EDITOR_TARGET Vectora_Editor)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -70,35 +70,38 @@ file(GLOB_RECURSE EDITOR CONFIGURE_DEPENDS
     Vectora_Editor/*.h
 )
 
-add_library(${V_ENGINE_TARGET} SHARED ${ENGINE})
+add_library(${VE_ENGINE_TARGET} SHARED ${ENGINE})
 
 # Include your own headers
-target_include_directories(${V_ENGINE_TARGET} PUBLIC
+target_include_directories(${VE_ENGINE_TARGET} PUBLIC
     ${CMAKE_SOURCE_DIR}/Vectora_Engine
     ${CMAKE_SOURCE_DIR}/includes
 )
 
-target_compile_definitions(${V_ENGINE_TARGET} PRIVATE V_BUILD_DLL V_PLATFORM_WINDOWS)
-
+target_compile_definitions(${VE_ENGINE_TARGET} PRIVATE VE_BUILD_DLL VE_PLATFORM_WINDOWS)
+target_compile_definitions(${VE_ENGINE_TARGET}
+    PRIVATE
+        $<$<CONFIG:Debug>:VE_ENABLE_ASSERTS>
+)
 # Link libraries
-target_link_libraries(${V_ENGINE_TARGET} PUBLIC
+target_link_libraries(${VE_ENGINE_TARGET} PUBLIC
     glfw
     glm::glm
     spdlog::spdlog
     OpenGL::GL
 )
 
-target_precompile_headers(${V_ENGINE_TARGET} PRIVATE 
+target_precompile_headers(${VE_ENGINE_TARGET} PRIVATE 
     Vectora_Engine/vpch.h
 )
 
-add_executable(${V_EDITOR_TARGET} ${EDITOR})
-target_include_directories(${V_EDITOR_TARGET} PRIVATE
+add_executable(${VE_EDITOR_TARGET} ${EDITOR})
+target_include_directories(${VE_EDITOR_TARGET} PRIVATE
     ${CMAKE_SOURCE_DIR}/Vectora_Editor
     ${CMAKE_SOURCE_DIR}/includes
 )
-target_compile_definitions(${V_EDITOR_TARGET} PRIVATE V_PLATFORM_WINDOWS)
-target_link_libraries(${V_EDITOR_TARGET} PRIVATE ${V_ENGINE_TARGET})
+target_compile_definitions(${VE_EDITOR_TARGET} PRIVATE VE_PLATFORM_WINDOWS)
+target_link_libraries(${VE_EDITOR_TARGET} PRIVATE ${VE_ENGINE_TARGET})
 
 
 
