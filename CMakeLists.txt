@@ -92,7 +92,7 @@ target_link_libraries(${VE_ENGINE_TARGET} PUBLIC
 )
 
 target_precompile_headers(${VE_ENGINE_TARGET} PRIVATE 
-    Vectora_Engine/vpch.h
+    "$<$<COMPILE_LANGUAGE:CXX>:vpch.h>"
 )
 
 add_executable(${VE_EDITOR_TARGET} ${EDITOR})
