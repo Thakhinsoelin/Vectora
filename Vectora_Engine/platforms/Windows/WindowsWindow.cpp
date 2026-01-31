@@ -90,25 +90,31 @@ namespace Vectora {
 			switch (action) {
 				case GLFW_PRESS:
 				{
-					KeyPressedEvent event(key, 0);
+					KeyPressedEvent event(static_cast<VE_KEYCODE>(key), 0);
 					data.EventCallback(event);
 					break;
 				}
 
 				case GLFW_RELEASE:
 				{
-					KeyReleasedEvent event(key);
+					KeyReleasedEvent event(static_cast<VE_KEYCODE>(key));
 					data.EventCallback(event);
 					break;
 				}
 
 				case GLFW_REPEAT:
 				{
-					KeyPressedEvent event(key, 1);
+					KeyPressedEvent event(static_cast<VE_KEYCODE>(key), 1);
 					data.EventCallback(event);
 					break;
 				}
 			}
+		});
+
+		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int key) {
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			KeyTypedEvent event(static_cast<VE_KEYCODE>(key));
+			data.EventCallback(event);
 		});
 
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods) {
@@ -116,14 +122,14 @@ namespace Vectora {
 		switch (action) {
 			case GLFW_PRESS:
 			{
-				MouseButtonPressedEvent event(button);
+				MouseButtonPressedEvent event(static_cast<VE_KEYCODE>(button));
 				data.EventCallback(event);
 				break;
 			}
 
 			case GLFW_RELEASE:
 			{
-				MouseButtonReleasedEvent event(button);
+				MouseButtonReleasedEvent event(static_cast<VE_KEYCODE>(button));
 				data.EventCallback(event);
 				break;
 			}

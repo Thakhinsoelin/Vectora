@@ -1,5 +1,6 @@
 #pragma once
 #include "Events/Event.h"
+#include "KeyCodes.h"
 
 namespace Vectora {
 	class VECTORA_API MouseMovedEvent : public Event
@@ -51,21 +52,21 @@ namespace Vectora {
 	class VECTORA_API MouseButtonEvent : public Event
 	{
 	public:
-		inline int GetMouseButton() const { return m_Button; }
+		inline VE_KEYCODE GetMouseButton() const { return m_Button; }
 
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	protected:
-		MouseButtonEvent(int button)
+		MouseButtonEvent(VE_KEYCODE button)
 			: m_Button(button) {
 		}
 
-		int m_Button;
+		VE_KEYCODE m_Button;
 	};
 
 	class VECTORA_API MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonPressedEvent(int button)
+		MouseButtonPressedEvent(VE_KEYCODE button)
 			: MouseButtonEvent(button) {
 		}
 
@@ -82,7 +83,7 @@ namespace Vectora {
 	class VECTORA_API MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonReleasedEvent(int button)
+		MouseButtonReleasedEvent(VE_KEYCODE button)
 			: MouseButtonEvent(button) {
 		}
 

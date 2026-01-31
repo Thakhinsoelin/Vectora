@@ -1,22 +1,23 @@
 #pragma once
 #include "Events/Event.h"
+#include "KeyCodes.h"
 
 namespace Vectora {
 	class VECTORA_API KeyEvent : public Event {
 	public:
-		inline int GetKeyCode() const { return m_KeyCode; }
+		inline VE_KEYCODE GetKeyCode() const { return m_KeyCode; }
 		
 		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 	protected:
-		KeyEvent(int keycode)
+		KeyEvent(VE_KEYCODE keycode)
 			: m_KeyCode(keycode) {
 		}
-		int m_KeyCode;
+		VE_KEYCODE m_KeyCode;
 	};
 
 	class VECTORA_API KeyPressedEvent : public KeyEvent {
 	public:
-		KeyPressedEvent(int keycode, bool isRepeat = false)
+		KeyPressedEvent(VE_KEYCODE keycode, bool isRepeat = false)
 			: KeyEvent(keycode), m_IsRepeat(isRepeat) {
 		}
 		bool IsRepeat() {
@@ -33,7 +34,7 @@ namespace Vectora {
 
 	class VECTORA_API KeyReleasedEvent : public KeyEvent {
 	public:
-		KeyReleasedEvent(int keycode)
+		KeyReleasedEvent(VE_KEYCODE keycode)
 			: KeyEvent(keycode) {
 		}
 		std::string ToString() const override {
@@ -41,5 +42,17 @@ namespace Vectora {
 		}
 		EVENT_CLASS_TYPE(KeyReleased)
 	
+	};
+
+	class VECTORA_API KeyTypedEvent : public KeyEvent {
+	public:
+		KeyTypedEvent(VE_KEYCODE keycode)
+			: KeyEvent(keycode) {
+		}
+		std::string ToString() const override {
+			return std::string("KeyTypedEvent: ") + std::to_string(m_KeyCode);
+		}
+		EVENT_CLASS_TYPE(KeyTyped)
+
 	};
 }
