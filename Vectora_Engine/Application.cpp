@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "vpch.h"
 #include "Events/Event.h"
+#include "Input.h"
 #include "Events/ApplicationEvent.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
@@ -36,6 +37,8 @@ namespace Vectora {
 
 			for (auto& layer : layerstack)
 				layer->OnUpdate();
+			auto [x, y] = Input::GetMousePosition();
+			VE_CORE_ERROR("{0}, {1}", x, y);
 			/*ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 			ImGuiIO& io = ImGui::GetIO();

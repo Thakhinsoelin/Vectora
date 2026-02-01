@@ -8,6 +8,9 @@ public:
     }
 
     void OnUpdate() override {
+		/*if (Vectora::Input::IsKeyPressed(VE_KEYCODE::VE_KEY_SPACE)) {
+			VE_CORE_INFO("Space Key Pressed!");
+		}*/
 		VE_CORE_INFO("TestLayer::Update");
     }
 

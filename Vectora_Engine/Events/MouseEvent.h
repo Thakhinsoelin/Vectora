@@ -13,15 +13,15 @@ namespace Vectora {
 		inline float GetX() const { return m_MouseX; }
 		inline float GetY() const { return m_MouseY; }
 
-		std::string ToString() const override
+		std::string ToString() const override final
 		{
 			std::stringstream ss;
 			ss << "MouseMovedEvent: " << m_MouseX << ", " << m_MouseY;
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseMoved)
-		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_TYPE_FINAL(MouseMoved)
+		EVENT_CLASS_CATEGORY_FINAL(EventCategoryMouse | EventCategoryInput)
 	private:
 		float m_MouseX, m_MouseY;
 	};
@@ -36,15 +36,15 @@ namespace Vectora {
 		inline float GetXOffset() const { return m_XOffset; }
 		inline float GetYOffset() const { return m_YOffset; }
 
-		std::string ToString() const override
+		std::string ToString() const override final
 		{
 			std::stringstream ss;
 			ss << "MouseScrolledEvent: " << GetXOffset() << ", " << GetYOffset();
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseScrolled)
-		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_TYPE_FINAL(MouseScrolled)
+		EVENT_CLASS_CATEGORY_FINAL(EventCategoryMouse | EventCategoryInput)
 	private:
 		float m_XOffset, m_YOffset;
 	};
@@ -54,7 +54,7 @@ namespace Vectora {
 	public:
 		inline VE_KEYCODE GetMouseButton() const { return m_Button; }
 
-		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_CATEGORY_FINAL(EventCategoryMouse | EventCategoryInput)
 	protected:
 		MouseButtonEvent(VE_KEYCODE button)
 			: m_Button(button) {
@@ -70,14 +70,14 @@ namespace Vectora {
 			: MouseButtonEvent(button) {
 		}
 
-		std::string ToString() const override
+		std::string ToString() const override final
 		{
 			std::stringstream ss;
 			ss << "MouseButtonPressedEvent: " << m_Button;
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseButtonPressed)
+		EVENT_CLASS_TYPE_FINAL(MouseButtonPressed)
 	};
 
 	class VECTORA_API MouseButtonReleasedEvent : public MouseButtonEvent
@@ -87,13 +87,13 @@ namespace Vectora {
 			: MouseButtonEvent(button) {
 		}
 
-		std::string ToString() const override
+		std::string ToString() const override final
 		{
 			std::stringstream ss;
 			ss << "MouseButtonReleasedEvent: " << m_Button;
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseButtonReleased)
+		EVENT_CLASS_TYPE_FINAL(MouseButtonReleased)
 	};
 }
