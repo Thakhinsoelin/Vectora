@@ -7,7 +7,7 @@ namespace Vectora {
 	public:
 		inline VE_KEYCODE GetKeyCode() const { return m_KeyCode; }
 		
-		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
+		EVENT_CLASS_CATEGORY_FINAL(EventCategoryKeyboard | EventCategoryInput)
 	protected:
 		KeyEvent(VE_KEYCODE keycode)
 			: m_KeyCode(keycode) {
@@ -20,13 +20,13 @@ namespace Vectora {
 		KeyPressedEvent(VE_KEYCODE keycode, bool isRepeat = false)
 			: KeyEvent(keycode), m_IsRepeat(isRepeat) {
 		}
-		bool IsRepeat() {
+		bool IsRepeat() const {
 			return m_IsRepeat;
 		}
-		std::string ToString() const override {
+		std::string ToString() const override final {
 			return std::string("KeyPressedEvent: ") + std::to_string(m_KeyCode) + " (repeat = " + std::to_string(m_IsRepeat) + ")";
 		}
-		EVENT_CLASS_TYPE(KeyPressed)
+		EVENT_CLASS_TYPE_FINAL(KeyPressed)
 	private:
 		
 		bool m_IsRepeat;
@@ -37,10 +37,10 @@ namespace Vectora {
 		KeyReleasedEvent(VE_KEYCODE keycode)
 			: KeyEvent(keycode) {
 		}
-		std::string ToString() const override {
+		std::string ToString() const override final {
 			return std::string("KeyReleasedEvent: ") + std::to_string(m_KeyCode);
 		}
-		EVENT_CLASS_TYPE(KeyReleased)
+		EVENT_CLASS_TYPE_FINAL(KeyReleased)
 	
 	};
 
@@ -49,10 +49,10 @@ namespace Vectora {
 		KeyTypedEvent(VE_KEYCODE keycode)
 			: KeyEvent(keycode) {
 		}
-		std::string ToString() const override {
+		std::string ToString() const override final{
 			return std::string("KeyTypedEvent: ") + std::to_string(m_KeyCode);
 		}
-		EVENT_CLASS_TYPE(KeyTyped)
+		EVENT_CLASS_TYPE_FINAL(KeyTyped)
 
 	};
 }

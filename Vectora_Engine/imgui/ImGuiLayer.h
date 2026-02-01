@@ -13,10 +13,10 @@ namespace Vectora {
 		ImGuiLayer();
 		~ImGuiLayer();
 
-		void OnAttach();
-		void OnDetach();
-		void OnUpdate();
-		void OnEvent(Event& event);
+		void OnAttach() override final;
+		void OnDetach() override final;
+		void OnUpdate() override final;
+		void OnEvent(Event& event) override final;
 
 	private:
 		bool OnMouseButtonPressedEvent(MouseButtonPressedEvent& e);

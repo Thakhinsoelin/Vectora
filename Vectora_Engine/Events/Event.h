@@ -32,7 +32,12 @@ namespace Vectora {
 								virtual EventType GetEventType() const override { return GetStaticType(); }\
 								virtual const char* GetName() const override { return #type; }
 
+#define EVENT_CLASS_TYPE_FINAL(type) static EventType GetStaticType() { return EventType::type; }\
+								virtual EventType GetEventType() const override final{ return GetStaticType(); }\
+								virtual const char* GetName() const override final { return #type; }
+
 #define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
+#define EVENT_CLASS_CATEGORY_FINAL(category) virtual int GetCategoryFlags() const override final { return category; }
 
 	class VECTORA_API Event {
 	public:

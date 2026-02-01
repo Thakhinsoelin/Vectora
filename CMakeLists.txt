@@ -61,6 +61,27 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(glfw glm spdlog imgui)
+add_library(imgui_static STATIC 
+    ${imgui_SOURCE_DIR}/imgui.cpp
+    ${imgui_SOURCE_DIR}/imgui_demo.cpp
+    ${imgui_SOURCE_DIR}/imgui_draw.cpp
+    ${imgui_SOURCE_DIR}/imgui_tables.cpp
+    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+)
+
+target_include_directories(imgui_static PUBLIC
+    ${imgui_SOURCE_DIR}
+    ${imgui_SOURCE_DIR}/backends
+)
+
+target_link_libraries(imgui_static PRIVATE
+    glfw
+    OpenGL::GL
+)
+target_compile_definitions(imgui_static PRIVATE GLFW_INCLUDE_NONE)
+
 
 # --- OpenGL ---
 find_package(OpenGL REQUIRED)
@@ -77,27 +98,10 @@ file(GLOB_RECURSE EDITOR CONFIGURE_DEPENDS
     Vectora_Editor/*.h
 )
 
-add_library(imgui_static STATIC 
-    ${imgui_SOURCE_DIR}/imgui.cpp
-    ${imgui_SOURCE_DIR}/imgui_demo.cpp
-    ${imgui_SOURCE_DIR}/imgui_draw.cpp
-    ${imgui_SOURCE_DIR}/imgui_tables.cpp
-    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
-)
 
-target_include_directories(imgui_static PUBLIC
-    ${imgui_SOURCE_DIR}
-)
-
-target_link_libraries(imgui_static PRIVATE
-    glfw
-    OpenGL::GL
-)
 
 add_library(${VE_ENGINE_TARGET} SHARED ${ENGINE})
-
+add_dependencies(${VE_ENGINE_TARGET} imgui_static)
 # Include your own headers
 target_include_directories(${VE_ENGINE_TARGET} PUBLIC
     ${CMAKE_SOURCE_DIR}/Vectora_Engine
