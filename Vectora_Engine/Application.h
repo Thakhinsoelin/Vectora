@@ -2,6 +2,7 @@
 #include "Core.h"
 #include "Window.h"
 #include "LayerStack.h"
+#include "imgui/ImGuiLayer.h"
 #include "Events/Event.h"
 #include "Events/ApplicationEvent.h"
 
@@ -26,6 +27,7 @@ namespace Vectora {
 		inline static Application& Get() { return *s_Instance; }
 	private:
 		std::unique_ptr<Window> window;
+		ImGuiLayer* m_ImguiLayer;
 		LayerStack layerstack;
 		bool m_Running = true;
 		static Application* s_Instance;
