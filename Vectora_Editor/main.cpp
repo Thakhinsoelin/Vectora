@@ -1,10 +1,18 @@
 #include "Vectora.h"
+#include "imgui.h"
+#include "imgui/ImGuiLayer.h"
 
 class TestLayer : public Vectora::Layer {
 public:
     TestLayer()
     : Layer("Example"){
 
+    }
+    virtual void OnImGuiRender() override
+    {
+        ImGui::Begin("Test");
+        ImGui::Text("Hello World");
+        ImGui::End();
     }
 
     void OnUpdate() override {
@@ -23,7 +31,10 @@ class SandBox : public Vectora::Application {
 public:
     SandBox() {
 		PushLayer(new TestLayer() );
-        PushOverlay(new Vectora::ImGuiLayer());
+
+        // SYNC CONTEXT: This prevents the Segfault
+        auto* imguiLayer = (Vectora::ImGuiLayer*)Vectora::ImGuiLayer::GetImguiLayerInstance();
+        ImGui::SetCurrentContext(imguiLayer->GetContext());
     }
     ~SandBox() {
 

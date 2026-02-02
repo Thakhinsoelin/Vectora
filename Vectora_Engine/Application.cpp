@@ -22,6 +22,8 @@ namespace Vectora {
 
 		window = std::unique_ptr<Window>(Window::Create());
 		window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+		m_ImguiLayer = new ImGuiLayer();
+		PushOverlay(m_ImguiLayer);
 	}
 
 	Application::~Application()
@@ -37,19 +39,13 @@ namespace Vectora {
 
 			for (auto& layer : layerstack)
 				layer->OnUpdate();
-			auto [x, y] = Input::GetMousePosition();
-			VE_CORE_ERROR("{0}, {1}", x, y);
-			/*ImGui::Render();
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-			ImGuiIO& io = ImGui::GetIO();
-
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			
+			m_ImguiLayer->Begin();
+			for (Layer* layer: layerstack)
 			{
-				GLFWwindow* backup_current_context = glfwGetCurrentContext();
-				ImGui::UpdatePlatformWindows();
-				ImGui::RenderPlatformWindowsDefault();
-				glfwMakeContextCurrent(backup_current_context);
-			}*/
+				layer->OnImGuiRender();
+			}
+			m_ImguiLayer->End();
 
 			window->OnUpdate();
 		}

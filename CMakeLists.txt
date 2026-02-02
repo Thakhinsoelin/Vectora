@@ -136,7 +136,7 @@ target_include_directories(${VE_EDITOR_TARGET} PRIVATE
     ${CMAKE_SOURCE_DIR}/includes
 )
 target_compile_definitions(${VE_EDITOR_TARGET} PRIVATE VE_PLATFORM_WINDOWS)
-target_link_libraries(${VE_EDITOR_TARGET} PRIVATE ${VE_ENGINE_TARGET})
+target_link_libraries(${VE_EDITOR_TARGET} PUBLIC ${VE_ENGINE_TARGET})
 
 
 
