@@ -1,0 +1,29 @@
+#include "vpch.h"
+#include "OpenGLContext.h"
+
+#include <GLFW/glfw3.h>
+#include <glad/glad.h>
+
+namespace Vectora {
+	OpenGLContext::OpenGLContext(GLFWwindow* windowHandle)
+		: m_WindowHandle(windowHandle)
+	{
+		VE_CORE_ASSERT(windowHandle, "Window handle is null!");
+	}
+	void OpenGLContext::Init()
+	{
+		glfwMakeContextCurrent(m_WindowHandle);
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		VE_CORE_ASSERT(status, "Failed to initialize Glad!");
+
+		VE_CORE_INFO("Opengl info:");
+		VE_CORE_INFO("    Vendor: {0}", (const char*)glGetString(GL_VENDOR));
+		VE_CORE_INFO("    Renderer: {0}", (const char*)glGetString(GL_RENDERER));
+		VE_CORE_INFO("    Version: {0}", (const char*)glGetString(GL_VERSION));
+	}
+	void OpenGLContext::SwapBuffers()
+	{
+		
+		glfwSwapBuffers(m_WindowHandle);
+	}
+}

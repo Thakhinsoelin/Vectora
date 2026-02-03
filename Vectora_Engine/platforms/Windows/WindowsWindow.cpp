@@ -5,6 +5,7 @@
 #include "Events/ApplicationEvent.h"
 #include "Events/KeyEvent.h"
 #include "Events/MouseEvent.h"
+#include "platforms/OpenGL/OpenGLContext.h"
 
 #include <glad/glad.h>
 
@@ -30,7 +31,7 @@ namespace Vectora {
 	void WindowsWindow::OnUpdate()
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(m_Window);
+		m_Context->SwapBuffers();
 	}
 	void WindowsWindow::SetVSync(bool enabled)
 	{
@@ -62,11 +63,9 @@ namespace Vectora {
 
 		}
 		m_Window = glfwCreateWindow(prop.width, prop.height, prop.title, nullptr, nullptr);
-		glfwMakeContextCurrent(m_Window);
-
-		// Initialize glad here
-		int success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		VE_CORE_ASSERT(success, "Failed to initialize glad! {0}");
+		
+		m_Context = new OpenGLContext(m_Window);
+		m_Context->Init();
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);

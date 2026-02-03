@@ -31,6 +31,7 @@ namespace Vectora {
 		LayerStack layerstack;
 		bool m_Running = true;
 		static Application* s_Instance;
+		unsigned int m_VertexBuffer, m_IndexArray, m_VertexArray;
 	};
 	Application* CreateApplication();
 }

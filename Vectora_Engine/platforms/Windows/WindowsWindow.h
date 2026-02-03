@@ -2,6 +2,8 @@
 
 #include "Window.h"
 #include "platforms/Windows/WindowsWindow.h"
+#include "Renderer/GraphicsContext.h"
+
 #include <GLFW/glfw3.h>
 
 namespace Vectora {
@@ -28,7 +30,7 @@ namespace Vectora {
 
 	private:
 		GLFWwindow* m_Window;
-
+		GraphicsContext* m_Context;
 		struct WindowData
 		{
 			std::string Title;

@@ -19,11 +19,11 @@ public:
 		/*if (Vectora::Input::IsKeyPressed(VE_KEYCODE::VE_KEY_SPACE)) {
 			VE_CORE_INFO("Space Key Pressed!");
 		}*/
-		VE_CORE_INFO("TestLayer::Update");
+		//VE_CORE_INFO("TestLayer::Update");
     }
 
     void OnEvent(Vectora::Event& event) override {
-        VE_TRACE("{0}", event);
+        //VE_TRACE("{0}", event);
     }
 };
 
