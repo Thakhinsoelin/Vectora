@@ -138,6 +138,10 @@ target_include_directories(${VE_EDITOR_TARGET} PRIVATE
 target_compile_definitions(${VE_EDITOR_TARGET} PRIVATE VE_BUILD_STATIC VE_PLATFORM_WINDOWS)
 target_link_libraries(${VE_EDITOR_TARGET} PUBLIC ${VE_ENGINE_TARGET})
 
+set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY
+    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}"
+)
 
 
 add_custom_command(
