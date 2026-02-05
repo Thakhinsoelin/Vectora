@@ -14,8 +14,12 @@ namespace Vectora {
 
 		virtual void Bind() const;
 		virtual void Unbind() const;
+
+		virtual const BufferLayout& GetLayout() const override final;
+		virtual void SetLayout(const BufferLayout& layout) override final;
 	private:
 		uint32_t m_RendererID;
+		BufferLayout m_Layout;
 	};
 
 	class OpenGLIndexBuffer : public IndexBuffer

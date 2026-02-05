@@ -6,6 +6,10 @@ set(VE_EDITOR_TARGET Vectora_Editor)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+#I might need this later
+# This ensures /MD for Release and /MDd for Debug
+# set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL") 
+
 if (WIN32)
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(ENGINE_PLATFORM "Win64")
@@ -138,15 +142,27 @@ target_include_directories(${VE_EDITOR_TARGET} PRIVATE
 target_compile_definitions(${VE_EDITOR_TARGET} PRIVATE VE_BUILD_STATIC VE_PLATFORM_WINDOWS)
 target_link_libraries(${VE_EDITOR_TARGET} PUBLIC ${VE_ENGINE_TARGET})
 
+foreach(OUTPUTCONFIG Debug Release RelWithDebInfo MinSizeRel)
+    string(TOUPPER ${OUTPUTCONFIG} CONFIG_UPPER)
+    set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM}"
+    )
+    set_target_properties(${VE_ENGINE_TARGET} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM}"
+        LIBRARY_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM}"
+        ARCHIVE_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM}"
+    )
+endforeach()
+
+#${CMAKE_BINARY_DIR}/bin/$<CONFIG>-${ENGINE_PLATFORM}
 set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY
-    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}"
+    "${CMAKE_BINARY_DIR}/bin/$<CONFIG>-${ENGINE_PLATFORM}"
 )
 
-
 add_custom_command(
-        TARGET ${VE_EDITOR_TARGET} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory 
-                ${CMAKE_SOURCE_DIR}/Vectora_Engine/shaders
-                $<TARGET_FILE_DIR:${VE_EDITOR_TARGET}>/shaders
-    )
+    TARGET ${VE_EDITOR_TARGET} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+            "${CMAKE_SOURCE_DIR}/Vectora_Engine/shaders"
+            "$<TARGET_FILE_DIR:${VE_EDITOR_TARGET}>/shaders"
+)
