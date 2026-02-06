@@ -25,20 +25,20 @@ namespace Vectora {
 		VE_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 
-		window = std::unique_ptr<Window>(Window::Create());
+		window = std::unique_ptr<Window>(Window::Create(WindowProps("test",800, 800 )));
 		window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 		m_ImguiLayer = new ImGuiLayer();
 		PushOverlay(m_ImguiLayer);
 
-		m_Shader = std::make_shared<Shader>("shaders/vertex.glsl", "shaders/fragment.glsl");
+		/*m_Shader = std::make_shared<Shader>("shaders/vertex.glsl", "shaders/fragment.glsl");
 		m_Shader->createShaders(BOTH_FROM_FILE);
-		m_Shader->Bind();
+		m_Shader->Bind();*/
 		
-		m_BlueShader = std::make_shared<Shader>("shaders/blueRectVt.glsl", "shaders/blueRectFg.glsl");
-		m_BlueShader->createShaders(BOTH_FROM_FILE);
+		/*m_BlueShader = std::make_shared<Shader>("shaders/blueRectVt.glsl", "shaders/blueRectFg.glsl");
+		m_BlueShader->createShaders(BOTH_FROM_FILE);*/
 		
 
-		float vertices[] = {
+		/*float vertices[] = {
 			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
 			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
 			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f
@@ -81,7 +81,41 @@ namespace Vectora {
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
 		std::shared_ptr<IndexBuffer> squareIB;
 		squareIB.reset(IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
-		m_SquareVA->SetIndexBuffer(squareIB);
+		m_SquareVA->SetIndexBuffer(squareIB);*/
+		m_BlueShader = std::make_shared<Shader>("shaders/circleVt.glsl", "shaders/circleFg.glsl");
+		m_BlueShader->createShaders(BOTH_FROM_FILE);
+		m_BlueShader->Bind();
+
+		std::vector<float> circlePoints;
+
+		float radius = 0.2f;
+		int segments = 64;
+
+		for (size_t i = 0; i < segments; i++)
+		{
+			float angle = 2.0f * 3.14159265358979323846264338327950288 * i / segments;
+			circlePoints.push_back(radius * cos(angle));
+			circlePoints.push_back(radius * sin(angle));
+		}
+
+		m_CircleVA.reset(VertexArray::Create());
+		BufferLayout circlelayout = {
+			{ ShaderDataType::Float2, "a_Position" },
+		};
+
+		std::shared_ptr<VertexBuffer> vertexBuffer;
+		vertexBuffer.reset(VertexBuffer::Create(circlePoints.data(), circlePoints.size()* sizeof(float)));
+
+		vertexBuffer->SetLayout(circlelayout);
+		m_CircleVA->AddVertexBuffer(vertexBuffer);
+
+		uint32_t indices[3] = { 0, 1, 2 };
+		std::shared_ptr<IndexBuffer> indexBuffer;
+		indexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		m_CircleVA->SetIndexBuffer(indexBuffer);
+
+		rays.push_back(Ray(glm::vec2(-0.5f, 0.f), glm::vec2(0.5f, 0.f)));
+
 	}
 
 	Application::~Application()
@@ -91,18 +125,31 @@ namespace Vectora {
 
 	void Application::Run()
 	{
+		glm::vec2 offset(0.5f, 0.f);
 		while (m_Running) {
 			glClearColor(0.1, 0.1, 0.1, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			//m_BlueShader->Bind();
+			//m_SquareVA->Bind();
+			//glDrawElements(GL_TRIANGLES, m_SquareVA->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+			///*glDrawArrays(GL_TRIANGLES, 0, 3);*/
+			//
+			//m_Shader->Bind();
+			//m_VertexArray->Bind();
+			//glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 			m_BlueShader->Bind();
-			m_SquareVA->Bind();
-			glDrawElements(GL_TRIANGLES, m_SquareVA->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
-			/*glDrawArrays(GL_TRIANGLES, 0, 3);*/
-			
-			m_Shader->Bind();
-			m_VertexArray->Bind();
-			glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+			m_BlueShader->setVec2("offset", offset.x, offset.y);
+			m_CircleVA->Bind();
+			/*glDrawArrays(GL_LINE_LOOP, 0,m_VertexArray->GetVertexBuffers().size());*/
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 64);
+
+			for (auto& e : rays) {
+				//glLineWidth(3.0f);
+				e.draw();
+				e.step();
+			}
+
 			for (auto& layer : layerstack)
 				layer->OnUpdate();
 			
