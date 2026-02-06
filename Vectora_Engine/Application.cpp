@@ -82,39 +82,15 @@ namespace Vectora {
 		std::shared_ptr<IndexBuffer> squareIB;
 		squareIB.reset(IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 		m_SquareVA->SetIndexBuffer(squareIB);*/
-		m_BlueShader = std::make_shared<Shader>("shaders/circleVt.glsl", "shaders/circleFg.glsl");
-		m_BlueShader->createShaders(BOTH_FROM_FILE);
-		m_BlueShader->Bind();
+		
 
-		std::vector<float> circlePoints;
+		SagA = BlacHole(glm::vec3(0.f, 0.f, 0.f), 8.54e36f);
 
-		float radius = 0.2f;
-		int segments = 64;
-
-		for (size_t i = 0; i < segments; i++)
+		for (float i = -1.f; i <= 1.f; i += 0.05f)
 		{
-			float angle = 2.0f * 3.14159265358979323846264338327950288 * i / segments;
-			circlePoints.push_back(radius * cos(angle));
-			circlePoints.push_back(radius * sin(angle));
+			rays.push_back(Ray(glm::vec2(-0.5f, i), glm::vec2(0.5f, 0.f)));
+
 		}
-
-		m_CircleVA.reset(VertexArray::Create());
-		BufferLayout circlelayout = {
-			{ ShaderDataType::Float2, "a_Position" },
-		};
-
-		std::shared_ptr<VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(VertexBuffer::Create(circlePoints.data(), circlePoints.size()* sizeof(float)));
-
-		vertexBuffer->SetLayout(circlelayout);
-		m_CircleVA->AddVertexBuffer(vertexBuffer);
-
-		uint32_t indices[3] = { 0, 1, 2 };
-		std::shared_ptr<IndexBuffer> indexBuffer;
-		indexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
-		m_CircleVA->SetIndexBuffer(indexBuffer);
-
-		rays.push_back(Ray(glm::vec2(-0.5f, 0.f), glm::vec2(0.5f, 0.f)));
 
 	}
 
@@ -125,7 +101,8 @@ namespace Vectora {
 
 	void Application::Run()
 	{
-		glm::vec2 offset(0.5f, 0.f);
+		/*glm::vec2 offset(0.5f, 0.f);*/
+		glm::vec2 offset(0.0f, 0.f);
 		while (m_Running) {
 			glClearColor(0.1, 0.1, 0.1, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -138,16 +115,14 @@ namespace Vectora {
 			//m_Shader->Bind();
 			//m_VertexArray->Bind();
 			//glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
-			m_BlueShader->Bind();
-			m_BlueShader->setVec2("offset", offset.x, offset.y);
-			m_CircleVA->Bind();
+			
 			/*glDrawArrays(GL_LINE_LOOP, 0,m_VertexArray->GetVertexBuffers().size());*/
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 64);
+			SagA.draw();
 
 			for (auto& e : rays) {
 				//glLineWidth(3.0f);
 				e.draw();
-				e.step();
+				e.step(SagA.radius);
 			}
 
 			for (auto& layer : layerstack)
