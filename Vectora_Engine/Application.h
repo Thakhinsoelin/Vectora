@@ -47,10 +47,7 @@ namespace Vectora {
 			vertexBuffer->SetLayout(layout);
 			m_HoleVA->AddVertexBuffer(vertexBuffer);
 
-			uint32_t indices[3] = { 0, 1, 2 };
-			std::shared_ptr<IndexBuffer> indexBuffer;
-			indexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
-			m_HoleVA->SetIndexBuffer(indexBuffer);
+			
 
 			m_HoleShader = std::make_shared<Shader>("shaders/circleVt.glsl", "shaders/circleFg.glsl");
 			m_HoleShader->createShaders(BOTH_FROM_FILE);
@@ -80,14 +77,15 @@ namespace Vectora {
 		glm::vec2 origin;
 		glm::vec2 direction;
 		double r, phi;
+		bool active = true;
 		Ray(glm::vec2 ori, glm::vec2 dir)
-			:origin(ori), direction(dir) {
+			:origin(ori), direction(dir ) {
 			r = sqrt(origin.x * origin.x + origin.y * origin.y);
 			phi = atan2(ori.y, ori.x);
 			m_RayVA.reset(VertexArray::Create());
 			float vertices[] = {
-				origin.x, origin.y,
-				origin.x + direction.x, origin.y + direction.y
+				0, 0,
+				-direction.x, -direction.y
 			};
 
 			std::shared_ptr<VertexBuffer> vertexBuffer;
@@ -98,10 +96,7 @@ namespace Vectora {
 			vertexBuffer->SetLayout(layout);
 			m_RayVA->AddVertexBuffer(vertexBuffer);
 
-			uint32_t indices[3] = { 0, 1, 2 };
-			std::shared_ptr<IndexBuffer> indexBuffer;
-			indexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
-			m_RayVA->SetIndexBuffer(indexBuffer);
+			
 
 			m_RayShader = std::make_shared<Shader>("shaders/rayVt.glsl", "shaders/rayFg.glsl");
 			m_RayShader->createShaders(BOTH_FROM_FILE);
@@ -115,22 +110,64 @@ namespace Vectora {
 			glDrawArrays(GL_LINES, 0,2 );
 		}
 		void step(double r_s) {
+			if (!active) return;
 			r = sqrt(origin.x * origin.x + origin.y * origin.y);
 			if (r < r_s) {
 				return;
 			}
-			origin += direction * 0.025f;
+			// let's say dir = 0.5, 0 for example
+			origin.x += direction.x * 0.0025f;
 
 			// 4. NEW: Check if we just entered the event horizon
-			double new_r = sqrt(origin.x * origin.x + origin.y * origin.y);
-			if (new_r < r_s) {
-				// Optional: Snap the ray exactly to the edge of r_s for a clean look
-				glm::vec2 unit_pos = glm::normalize(origin);
-				origin = unit_pos * (float)r_s;
-			}
+			//double new_r = sqrt(origin.x * origin.x + origin.y * origin.y);
+			//if (new_r < r_s) {
+			//	// Optional: Snap the ray exactly to the edge of r_s for a clean look
+			//	glm::vec2 unit_pos = glm::normalize(origin);
+			//	origin = unit_pos * (float)r_s;
+			//}
 		}
 
-		//unsigned int VAO, VBO, VEO;
+		void gpt_step(double r_s, glm::vec2 bh_pos) {
+			if (!active) return;
+			glm::vec2 next_origin = (origin + direction * 0.0025f) ;
+
+				float dist_now = glm::distance(origin, bh_pos);
+				float dist_next = glm::distance(next_origin, bh_pos);
+				glm::vec2 relativePos = origin - bh_pos;
+				float r_dist = glm::length(relativePos);
+				// If it WAS outside but WILL BE inside
+				if (r_dist <= r_s) {
+					active = false;
+					//// 1. Calculate the exact intersection point (Optional "Snap")
+					//glm::vec2 to_ray = glm::normalize(next_origin - bh_pos);
+					//origin = bh_pos + to_ray * (float)r_s;
+					// here
+					//origin.x = bh_pos.x + glm::normalize(next_origin - bh_pos).x * (float)r_s;
+					origin.x = bh_pos.x + glm::normalize(relativePos).x * (float)r_s;
+					//// 2. Kill the ray
+					
+					return;
+				}
+				// 3. GRAVITY: Pull the direction vector toward the center
+	// Math: Force is proportional to 1/r^2 (simplified for visual effect)
+				glm::vec2 pull_direction = glm::normalize(bh_pos - origin);
+
+				// We use a small 'strength' factor. 
+				// In real physics, this involves the mass, but for your 800x800 screen:
+				float gravity_strength = 0.0005f / (r_dist * r_dist);
+
+				direction += pull_direction * gravity_strength;
+
+				// IMPORTANT: Light speed is constant, so we re-normalize direction
+				direction = glm::normalize(direction);
+
+				// 4. Move
+				origin += direction * 0.005f; // Adjust speed here
+				//origin = next_origin;
+			
+		}
+
+		//unsigned int VAO, VBO, VEO;;
 	private:
 		std::shared_ptr<VertexArray> m_RayVA;
 		std::shared_ptr<Shader> m_RayShader;

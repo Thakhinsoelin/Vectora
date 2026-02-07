@@ -88,7 +88,7 @@ namespace Vectora {
 
 		for (float i = -1.f; i <= 1.f; i += 0.05f)
 		{
-			rays.push_back(Ray(glm::vec2(-0.5f, i), glm::vec2(0.5f, 0.f)));
+			rays.push_back(Ray(glm::vec2(-0.5f, i), glm::vec2(1.0f, 0.f)));
 
 		}
 
@@ -122,7 +122,8 @@ namespace Vectora {
 			for (auto& e : rays) {
 				//glLineWidth(3.0f);
 				e.draw();
-				e.step(SagA.radius);
+				//e.step(SagA.radius);
+				e.gpt_step(SagA.radius, glm::vec2(SagA.position));
 			}
 
 			for (auto& layer : layerstack)

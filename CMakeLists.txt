@@ -94,6 +94,7 @@ file(GLOB_RECURSE ENGINE CONFIGURE_DEPENDS
     Vectora_Engine/*.cpp
     Vectora_Engine/*.c
     Vectora_Engine/*.h
+    Vectora_Engine/*.glsl
 )
 
 file(GLOB_RECURSE EDITOR CONFIGURE_DEPENDS
@@ -160,9 +161,16 @@ set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
     "${CMAKE_BINARY_DIR}/bin/$<CONFIG>-${ENGINE_PLATFORM}"
 )
 
-add_custom_command(
-    TARGET ${VE_EDITOR_TARGET} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+#add_custom_command(
+#   TARGET ${VE_EDITOR_TARGET} POST_BUILD
+#   COMMAND ${CMAKE_COMMAND} -E copy_directory 
+#           "${CMAKE_SOURCE_DIR}/Vectora_Engine/shaders"
+#           "$<TARGET_FILE_DIR:${VE_EDITOR_TARGET}>/shaders"
+#)
+
+add_custom_target(copy_shaders ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/Vectora_Engine/shaders"
             "$<TARGET_FILE_DIR:${VE_EDITOR_TARGET}>/shaders"
 )
+add_dependencies(${VE_EDITOR_TARGET} copy_shaders) 
