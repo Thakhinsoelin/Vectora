@@ -5,11 +5,9 @@
 #include "Events/ApplicationEvent.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
+#include "Renderer/Renderer.h"
+#include "Renderer/RenderCommand.h"
 #include <imgui.h>
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
 // This is stupid. C++ 20 magic
@@ -104,12 +102,17 @@ namespace Vectora {
 		/*glm::vec2 offset(0.5f, 0.f);*/
 		glm::vec2 offset(0.0f, 0.f);
 		while (m_Running) {
-			glClearColor(0.1, 0.1, 0.1, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
+			RenderCommand::SetClearColor({ 0.1, 0.1, 0.1, 1 });
+			RenderCommand::Clear();
 
+			Renderer::BeginScence();
 			m_BlueShader->Bind();
+			Renderer::Submit(m_SquareVA);
+
 			m_SquareVA->Bind();
-			glDrawElements(GL_TRIANGLES, m_SquareVA->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+			Renderer::Submit(m_VertexArray);
+
+			Renderer::EndScene();
 			/*glDrawArrays(GL_TRIANGLES, 0, 3);*/
 			
 			m_Shader->Bind();

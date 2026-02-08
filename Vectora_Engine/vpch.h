@@ -16,6 +16,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 #include <spdlog/fmt/fmt.h> // Ensure the base fmt header is visible
+
 #include <type_traits>
 
 #include "Log.h"
