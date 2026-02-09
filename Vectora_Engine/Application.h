@@ -8,6 +8,8 @@
 #include "Renderer/Shader.h"
 #include "Renderer/Buffer.h"
 #include "Renderer/VertexArray.h"
+#include "OrthographiCamera.h"
+
 #include <math.h>
 
 namespace Vectora {
@@ -35,7 +37,7 @@ namespace Vectora {
 		LayerStack layerstack;
 		bool m_Running = true;
 		static Application* s_Instance;
-		
+		OrthoGraphicCamera m_Camera;
 
 		std::shared_ptr<VertexArray> m_VertexArray;
 		std::shared_ptr<Shader> m_Shader;

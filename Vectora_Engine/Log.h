@@ -27,10 +27,10 @@ namespace Vectora {
 #define VE_CORE_WARN(...)	::Vectora::Log::GetCoreLogger()->warn(__VA_ARGS__)
 #define VE_CORE_INFO(...)	::Vectora::Log::GetCoreLogger()->info(__VA_ARGS__)
 #define VE_CORE_TRACE(...)	::Vectora::Log::GetCoreLogger()->trace(__VA_ARGS__)
-#define VE_CORE_FATAL(...)	::Vectora::Log::GetCoreLogger()->fatal(__VA_ARGS__)
+#define VE_CORE_CRITICAL(...)	::Vectora::Log::GetCoreLogger()->critical(__VA_ARGS__)
 
 #define VE_ERROR(...)	::Vectora::Log::GetClientLogger()->error(__VA_ARGS__)
 #define VE_WARN(...)		::Vectora::Log::GetClientLogger()->warn(__VA_ARGS__)
 #define VE_INFO(...)		::Vectora::Log::GetClientLogger()->info(__VA_ARGS__)
 #define VE_TRACE(...)	::Vectora::Log::GetClientLogger()->trace(__VA_ARGS__)
-#define VE_FATAL(...)	::Vectora::Log::GetClientLogger()->fatal(__VA_ARGS__)
+#define VE_CRITICAL(...)	::Vectora::Log::GetClientLogger()->critical(__VA_ARGS__)

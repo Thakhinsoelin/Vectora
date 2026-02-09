@@ -19,6 +19,7 @@ namespace Vectora {
 	Application* Application::s_Instance = nullptr;
 	
 	Application::Application()
+		:m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
 		VE_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
@@ -105,12 +106,15 @@ namespace Vectora {
 			RenderCommand::SetClearColor({ 0.1, 0.1, 0.1, 1 });
 			RenderCommand::Clear();
 
-			Renderer::BeginScence();
+			m_Camera.SetPosition({ 0.5f, 0.5f, 0.0f });
+			m_Camera.SetRotation(45.0f);
+
+			Renderer::BeginScence(m_Camera);
 			m_BlueShader->Bind();
-			Renderer::Submit(m_SquareVA);
+			Renderer::Submit(m_BlueShader, m_SquareVA);
 
 			m_SquareVA->Bind();
-			Renderer::Submit(m_VertexArray);
+			Renderer::Submit(m_Shader ,m_VertexArray);
 
 			Renderer::EndScene();
 			/*glDrawArrays(GL_TRIANGLES, 0, 3);*/
