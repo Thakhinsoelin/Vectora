@@ -84,7 +84,7 @@ namespace Vectora {
 		
 
 		/*SagA = BlacHole(glm::vec3(0.f, 0.f, 0.f), 8.54e36f);
-
+		
 		for (float i = -1.f; i <= 1.f; i += 0.05f)
 		{
 			rays.push_back(Ray(glm::vec2(-0.5f, i), glm::vec2(1.0f, 0.f)));
@@ -106,7 +106,7 @@ namespace Vectora {
 			RenderCommand::SetClearColor({ 0.1, 0.1, 0.1, 1 });
 			RenderCommand::Clear();
 
-			m_Camera.SetPosition({ 0.5f, 0.5f, 0.0f });
+			m_Camera.SetPosition(tempPos);
 			m_Camera.SetRotation(45.0f);
 
 			Renderer::BeginScence(m_Camera);
@@ -123,33 +123,13 @@ namespace Vectora {
 			m_VertexArray->Bind();
 			glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 			
-			
-			//SagA.draw();
-
-			//for (auto& e : rays) {
-			//	//glLineWidth(3.0f);
-			//	e.draw();
-			//	//e.step(SagA.radius);
-			//	e.gpt_step(SagA.radius, glm::vec2(SagA.position));
-			//}
+		
 
 			for (auto& layer : layerstack)
 				layer->OnUpdate();
 			
 			
 			m_ImguiLayer->Begin();
-			//ImGui::Begin("bla");
-			//ImGui::Text("Hello World");
-			//if (ImGui::Button("Restart")) {
-			//	int counter = 0;
-			//	for (float i = -1.f; i <= 1.f; i += 0.05f)
-			//	{
-			//		//rays.push_back(Ray(glm::vec2(-0.5f, i), glm::vec2(1.0f, 0.f)));
-			//		rays[counter] = Ray(glm::vec2(-0.5f, i), glm::vec2(1.0f, 0.f));
-			//		counter++;
-			//	}
-			//};
-			//ImGui::End();
 			for (Layer* layer: layerstack)
 			{
 				layer->OnImGuiRender();
@@ -165,6 +145,7 @@ namespace Vectora {
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClosed));
 
+		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(onmove));
 		//if(e.GetEventType() == EventType::MouseButtonPressed || e.GetEventType() == EventType::MouseButtonReleased)
 			//VE_CORE_TRACE("{0}", e);
 		
@@ -191,6 +172,18 @@ namespace Vectora {
 	bool Application::OnWindowClosed(WindowCloseEvent& e)
 	{
 		m_Running = false;
+		return true;
+	}
+
+	bool Application::onmove(KeyPressedEvent& e)
+	{
+		if (e.GetKeyCode() == VE_KEYCODE::VE_KEY_A)
+		{
+			//tempPos.x -= 0.1f;
+			tempPos.x -= cos(45.f) * 0.1;
+			tempPos.y -= sin(45.f) * 0.1;
+			m_Camera.SetPosition(tempPos);
+		}
 		return true;
 	}
 

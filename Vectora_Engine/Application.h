@@ -32,8 +32,9 @@ namespace Vectora {
 		inline static Application& Get() { return *s_Instance; }
 	private:
 		std::unique_ptr<Window> window;
-		
+		bool onmove(KeyPressedEvent& e);
 		ImGuiLayer* m_ImguiLayer;
+		glm::vec3 tempPos = { 0.5, 0.5, 0.0 };
 		LayerStack layerstack;
 		bool m_Running = true;
 		static Application* s_Instance;

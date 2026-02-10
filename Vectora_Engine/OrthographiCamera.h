@@ -2,7 +2,7 @@
 #include "Camera.h"
 
 namespace Vectora {
-	class OrthoGraphicCamera : public Camera
+	class VECTORA_API OrthoGraphicCamera : public Camera
 	{
 	public:
 
@@ -12,7 +12,6 @@ namespace Vectora {
 		virtual const glm::mat4& GetPV() const override;
 		virtual void SetRotation(float rotation) override final;
 		virtual float GetRotation(void) const override final;
-		virtual void SetPosition(glm::vec3& dir) override final;
 		void SetPosition(glm::vec3 dir);
 		virtual const glm::vec3& GetPosition() const override final;
 

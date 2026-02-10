@@ -29,16 +29,13 @@ namespace Vectora {
 	{
 		return this->m_Rotation;
 	}
-	void OrthoGraphicCamera::SetPosition(glm::vec3& dir)
-	{
-		this->m_Position = dir;
-		RecalculateViewMatrix();
-	}
+	
 	void OrthoGraphicCamera::SetPosition(glm::vec3 dir)
 	{
 		this->m_Position = dir;
 		RecalculateViewMatrix();
 	}
+
 	const glm::vec3& OrthoGraphicCamera::GetPosition() const
 	{
 		return this->m_Position;
