@@ -19,78 +19,14 @@ namespace Vectora {
 	Application* Application::s_Instance = nullptr;
 	
 	Application::Application()
-		:m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
 		VE_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
-
 		window = std::unique_ptr<Window>(Window::Create(/*WindowProps("test",800, 800 ))*/));
+		window->SetVSync(false);
 		window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 		m_ImguiLayer = new ImGuiLayer();
 		PushOverlay(m_ImguiLayer);
-
-		m_Shader = std::make_shared<Shader>("shaders/vertex.glsl", "shaders/fragment.glsl");
-		m_Shader->createShaders(BOTH_FROM_FILE);
-		m_Shader->Bind();
-		
-		m_BlueShader = std::make_shared<Shader>("shaders/blueRectVt.glsl", "shaders/blueRectFg.glsl");
-		m_BlueShader->createShaders(BOTH_FROM_FILE);
-		
-
-		float vertices[] = {
-			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
-			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
-			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f
-		};
-
-		m_VertexArray.reset(VertexArray::Create());
-
-		
-		BufferLayout layout = {
-			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float4, "a_Color" }
-		};
-		
-		std::shared_ptr<VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
-		
-		vertexBuffer->SetLayout(layout);
-		m_VertexArray->AddVertexBuffer(vertexBuffer);
-		
-		uint32_t indices[3] = { 0, 1, 2 };
-		std::shared_ptr<IndexBuffer> indexBuffer;
-		indexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
-		m_VertexArray->SetIndexBuffer(indexBuffer);
-
-		m_SquareVA.reset(VertexArray::Create());
-		float squareVertices[3 * 4] = {
-			-0.75f, -0.75f, 0.0f,
-			 0.75f, -0.75f, 0.0f,
-			 0.75f,  0.75f, 0.0f,
-			-0.75f,  0.75f, 0.0f
-		};
-
-		std::shared_ptr<VertexBuffer> squareVB;
-		squareVB.reset(VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
-		squareVB->SetLayout({
-			{ ShaderDataType::Float3, "a_Position" }
-			});
-		m_SquareVA->AddVertexBuffer(squareVB);
-
-		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-		std::shared_ptr<IndexBuffer> squareIB;
-		squareIB.reset(IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
-		m_SquareVA->SetIndexBuffer(squareIB);
-		
-
-		/*SagA = BlacHole(glm::vec3(0.f, 0.f, 0.f), 8.54e36f);
-		
-		for (float i = -1.f; i <= 1.f; i += 0.05f)
-		{
-			rays.push_back(Ray(glm::vec2(-0.5f, i), glm::vec2(1.0f, 0.f)));
-
-		}*/
-
 	}
 
 	Application::~Application()
@@ -100,34 +36,13 @@ namespace Vectora {
 
 	void Application::Run()
 	{
-		/*glm::vec2 offset(0.5f, 0.f);*/
-		glm::vec2 offset(0.0f, 0.f);
 		while (m_Running) {
-			RenderCommand::SetClearColor({ 0.1, 0.1, 0.1, 1 });
-			RenderCommand::Clear();
-
-			m_Camera.SetPosition(tempPos);
-			m_Camera.SetRotation(45.0f);
-
-			Renderer::BeginScence(m_Camera);
-			m_BlueShader->Bind();
-			Renderer::Submit(m_BlueShader, m_SquareVA);
-
-			m_SquareVA->Bind();
-			Renderer::Submit(m_Shader ,m_VertexArray);
-
-			Renderer::EndScene();
-			/*glDrawArrays(GL_TRIANGLES, 0, 3);*/
-			
-			m_Shader->Bind();
-			m_VertexArray->Bind();
-			glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
-			
-		
+			float time = (float)glfwGetTime();
+			Timestep timestep = time - m_LastFrameTime;
+			m_LastFrameTime = time;
 
 			for (auto& layer : layerstack)
-				layer->OnUpdate();
-			
+				layer->OnUpdate(timestep);
 			
 			m_ImguiLayer->Begin();
 			for (Layer* layer: layerstack)
@@ -145,7 +60,6 @@ namespace Vectora {
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClosed));
 
-		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(onmove));
 		//if(e.GetEventType() == EventType::MouseButtonPressed || e.GetEventType() == EventType::MouseButtonReleased)
 			//VE_CORE_TRACE("{0}", e);
 		
@@ -175,17 +89,6 @@ namespace Vectora {
 		return true;
 	}
 
-	bool Application::onmove(KeyPressedEvent& e)
-	{
-		if (e.GetKeyCode() == VE_KEYCODE::VE_KEY_A)
-		{
-			//tempPos.x -= 0.1f;
-			tempPos.x -= cos(45.f) * 0.1;
-			tempPos.y -= sin(45.f) * 0.1;
-			m_Camera.SetPosition(tempPos);
-		}
-		return true;
-	}
 
 	
 }

@@ -24,6 +24,7 @@ namespace Vectora {
 	{
 		this->m_Rotation = rotation;
 		RecalculateViewMatrix();
+		1 + 2;
 	}
 	float OrthoGraphicCamera::GetRotation(void) const
 	{

@@ -9,7 +9,7 @@
 #include "Renderer/Buffer.h"
 #include "Renderer/VertexArray.h"
 #include "OrthographiCamera.h"
-
+#include "Core/Timestep.h"
 #include <math.h>
 
 namespace Vectora {
@@ -32,23 +32,12 @@ namespace Vectora {
 		inline static Application& Get() { return *s_Instance; }
 	private:
 		std::unique_ptr<Window> window;
-		bool onmove(KeyPressedEvent& e);
 		ImGuiLayer* m_ImguiLayer;
-		glm::vec3 tempPos = { 0.5, 0.5, 0.0 };
 		LayerStack layerstack;
 		bool m_Running = true;
 		static Application* s_Instance;
-		OrthoGraphicCamera m_Camera;
-
-		std::shared_ptr<VertexArray> m_VertexArray;
-		std::shared_ptr<Shader> m_Shader;
-
-		std::shared_ptr<VertexArray> m_SquareVA;
-		std::shared_ptr<Shader> m_BlueShader;
-
 		
-		// std::vector<Ray> rays;
-		// BlacHole SagA;
+		float m_LastFrameTime = 0.f;
 	};
 	Application* CreateApplication();
 }

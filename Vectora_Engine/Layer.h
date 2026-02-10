@@ -2,6 +2,7 @@
 #include "Core.h"
 #include "vpch.h"
 #include "Events/Event.h"
+#include "Core/Timestep.h"
 
 namespace Vectora {
 	class VECTORA_API Layer
@@ -12,7 +13,7 @@ namespace Vectora {
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {};
-		virtual void OnUpdate() {};
+		virtual void OnUpdate(Timestep ts) {};
 		virtual void OnImGuiRender() {};
 		virtual void OnEvent(Event& event)
 		{
