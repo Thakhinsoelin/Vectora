@@ -11,7 +11,7 @@ public:
 		m_Shader = std::make_shared<Vectora::Shader>("shaders/vertex.glsl", "shaders/fragment.glsl");
 		m_Shader->createShaders(Vectora::BOTH_FROM_FILE);
 		m_Shader->Bind();
-
+		
 		m_BlueShader = std::make_shared<Vectora::Shader>("shaders/blueRectVt.glsl", "shaders/blueRectFg.glsl");
 		m_BlueShader->createShaders(Vectora::BOTH_FROM_FILE);
 
@@ -68,8 +68,9 @@ public:
 		ImGui::Text("Hello\n");
 		ImGui::End();
     }
-
     void OnUpdate(Vectora::Timestep ts) override {
+		glm::vec4 redColor(0.8f, 0.2f, 0.3f, 1.0f);
+		glm::vec4 blueColor(0.3f, 0.2f, 0.8f, 1.0f);
 		VE_TRACE("time: {0}", ts.GetMilliseconds());
 		if (Vectora::Input::IsKeyPressed(VE_KEY_LEFT))
 			m_CameraPosition.x += m_CameraMoveSpeed * ts;
@@ -84,10 +85,15 @@ public:
 			m_CubePosition.x -= m_CubeMoveSpeed * ts;
 		else if (Vectora::Input::IsKeyPressed(VE_KEY_L))
 			m_CubePosition.x += m_CubeMoveSpeed * ts;
-		if (Vectora::Input::IsKeyPressed(VE_KEY_I))
+		if (Vectora::Input::IsKeyPressed(VE_KEY_K))
 			m_CubePosition.y -= m_CubeMoveSpeed * ts;
-		else if (Vectora::Input::IsKeyPressed(VE_KEY_K))
+		else if (Vectora::Input::IsKeyPressed(VE_KEY_I))
 			m_CubePosition.y += m_CubeMoveSpeed * ts;
+
+		if (Vectora::Input::IsKeyPressed(VE_KEY_A))
+			m_CubeRotation += m_CubeRotationSpeed * ts;
+		else if (Vectora::Input::IsKeyPressed(VE_KEY_D))
+			m_CubeRotation -= m_CubeRotationSpeed * ts;
 
 		if (Vectora::Input::IsKeyPressed(VE_KEY_A))
 			m_CameraRotation += m_CameraRotationSpeed * ts;
@@ -111,6 +117,14 @@ public:
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos ) * scale;
 				transform = glm::translate(transform, m_CubePosition);
+				transform = glm::rotate(transform, glm::radians(m_CubeRotation), glm::vec3(0.0f, 1.0f, 0.0f));
+				if ((x + y) % 2 == 0)
+				{
+					m_BlueShader->setVec4("v_Color", redColor);
+				}
+				else {
+					m_BlueShader->setVec4("v_Color", blueColor);
+				}
 				Vectora::Renderer::Submit(m_BlueShader, m_SquareVA, transform);
 			}
 		}
@@ -122,8 +136,17 @@ public:
     }
 
     void OnEvent(Vectora::Event& event) override {
-    
+		Vectora::EventDispatcher dispatch(event);
+		dispatch.Dispatch<Vectora::KeyPressedEvent>(VE_BIND_EVENT_FN(TestLayer::OnEscapePressed));
     }
+
+	bool OnEscapePressed(Vectora::KeyPressedEvent& event) {
+		if (event.GetKeyCode() == VE_KEY_ESCAPE)
+		{
+			Vectora::Application::Get().SetRunning(false);
+		}
+		return true;
+	}
 private:
 	Vectora::OrthoGraphicCamera m_Camera;
 
@@ -139,7 +162,9 @@ private:
 	float m_CameraRotationSpeed = 180.f;
 
 	glm::vec3 m_CubePosition;
-	float m_CubeMoveSpeed = 1.f;
+	float m_CubeMoveSpeed = 10.f;
+	float m_CubeRotation = 0.f;
+	float m_CubeRotationSpeed = 20.f;
 };
 
 class SandBox : public Vectora::Application {
@@ -148,8 +173,8 @@ public:
 		PushLayer(new TestLayer() );
 
         // SYNC CONTEXT: This prevents the Segfault
-        auto* imguiLayer = (Vectora::ImGuiLayer*)Vectora::ImGuiLayer::GetImguiLayerInstance();
-        ImGui::SetCurrentContext(imguiLayer->GetContext());
+        /*auto* imguiLayer = (Vectora::ImGuiLayer*)Vectora::ImGuiLayer::GetImguiLayerInstance();
+        ImGui::SetCurrentContext(imguiLayer->GetContext());*/
     }
     ~SandBox() {
 

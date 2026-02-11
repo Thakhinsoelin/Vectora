@@ -162,9 +162,15 @@ namespace Vectora {
 
 	void Shader::setVec2(const std::string& name, float v1, float v2) const {
 		glUniform2f(glGetUniformLocation(RenderID, name.c_str()), v1, v2);
-	};
+	}
 
-	void Shader::setMat4(const std::string& name, const glm::mat4& trans) {
+	void Shader::setVec4(const std::string& name, const glm::vec4& vec4) const
+	{
+		glUniform4f(glGetUniformLocation(RenderID, name.c_str()), vec4.x, vec4.y, vec4.z, vec4.w);
+	}
+	;
+
+	void Shader::setMat4(const std::string& name, const glm::mat4& trans) const {
 		glUniformMatrix4fv(glGetUniformLocation(RenderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(trans));
 	}
 

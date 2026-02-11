@@ -6,7 +6,7 @@ set(VE_EDITOR_TARGET Vectora_Editor)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#I might need this later
+# I might need this later
 # This ensures /MD for Release and /MDd for Debug
 # set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL") 
 
@@ -31,6 +31,10 @@ foreach(OUTPUTCONFIG Debug Release RelWithDebInfo MinSizeRel)
         ${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM})
 endforeach()
 
+
+# Note that, dynamic fetching required libraries like this is not a good idea for production code,
+# and you should always consider vendoring the dependencies in your repository. This is just for learning purposes so it is fine.
+# having network issues can make this fail and vomit weird errors you cannot debug.
 include(FetchContent)
 FetchContent_Declare(
     glfw
@@ -55,7 +59,7 @@ FetchContent_Declare(
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG docking
+    GIT_TAG docking # Note that this is a bad idea to target an always changing branch, and you always only should use a specific tag.
     GIT_SHALLOW TRUE
 )
 
@@ -94,7 +98,7 @@ file(GLOB_RECURSE ENGINE CONFIGURE_DEPENDS
     Vectora_Engine/*.cpp
     Vectora_Engine/*.c
     Vectora_Engine/*.h
-    Vectora_Engine/*.glsl
+    Vectora_Engine/*.glsl # adding the glsl files to your target makes cmake also track that files so after the shader gets modified, cmake generation gets triggered again
 )
 
 file(GLOB_RECURSE EDITOR CONFIGURE_DEPENDS
@@ -129,7 +133,7 @@ target_link_libraries(${VE_ENGINE_TARGET} PUBLIC
     glm::glm
     spdlog::spdlog
     OpenGL::GL
-)
+) # // BREAKPOINT
 
 target_precompile_headers(${VE_ENGINE_TARGET} PRIVATE 
     "$<$<COMPILE_LANGUAGE:CXX>:vpch.h>"
@@ -155,19 +159,14 @@ foreach(OUTPUTCONFIG Debug Release RelWithDebInfo MinSizeRel)
     )
 endforeach()
 
+# Forcing the cmake build output
 #${CMAKE_BINARY_DIR}/bin/$<CONFIG>-${ENGINE_PLATFORM}
 set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY
     "${CMAKE_BINARY_DIR}/bin/$<CONFIG>-${ENGINE_PLATFORM}"
 )
 
-#add_custom_command(
-#   TARGET ${VE_EDITOR_TARGET} POST_BUILD
-#   COMMAND ${CMAKE_COMMAND} -E copy_directory 
-#           "${CMAKE_SOURCE_DIR}/Vectora_Engine/shaders"
-#           "$<TARGET_FILE_DIR:${VE_EDITOR_TARGET}>/shaders"
-#)
-
+# to copy the entire shaders to the output path, i am not sure it is a good idea or not
 add_custom_target(copy_shaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/Vectora_Engine/shaders"

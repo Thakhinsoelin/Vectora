@@ -30,6 +30,10 @@ namespace Vectora {
 		inline Window& GetWindow() { return *window; }
 
 		inline static Application& Get() { return *s_Instance; }
+
+		void SetRunning(bool run) {
+			this->m_Running = run;
+		}
 	private:
 		std::unique_ptr<Window> window;
 		ImGuiLayer* m_ImguiLayer;

@@ -9,15 +9,14 @@ namespace Vectora {
 	}
 	OrthoGraphicCamera::~OrthoGraphicCamera()
 	{
+		// TODO: implement clean up later
 	}
 	const glm::mat4& OrthoGraphicCamera::GetProjection() const
 	{
-		// TODO: insert return statement here
 		return m_ProjectionMatrix;
 	}
 	const glm::mat4& OrthoGraphicCamera::GetPV() const
 	{
-		// TODO: insert return statement here
 		return m_ViewProjectionMatrix;
 	}
 	void OrthoGraphicCamera::SetRotation(float rotation)
