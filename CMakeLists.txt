@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(Vectora LANGUAGES CXX)
+project(Vectora LANGUAGES C CXX)
 set(VE_ENGINE_TARGET Vectora_Engine)
 set(VE_EDITOR_TARGET Vectora_Editor)
 

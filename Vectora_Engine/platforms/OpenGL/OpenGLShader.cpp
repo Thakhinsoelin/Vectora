@@ -1,9 +1,7 @@
-#include "Renderer/Shader.h"
-#include <sstream>
-#include <glm/gtc/type_ptr.hpp>
+#include "OpenGLShader.h"
 
 namespace Vectora {
-	void Shader::getShaderCompilationError(unsigned int shaderID, GLenum ERROR_TYPE, ShaderType type) {
+	void OpenGLShader::getShaderCompilationError(unsigned int shaderID, GLenum ERROR_TYPE, ShaderType type) {
 		int success;
 		char log[512];
 		std::string stype;
@@ -21,7 +19,7 @@ namespace Vectora {
 		}
 	}
 
-	void Shader::getShaderLinkError(unsigned int program, GLenum ERROR_TYPE) {
+	void OpenGLShader::getShaderLinkError(unsigned int program, GLenum ERROR_TYPE) {
 		int success;
 		char log[512];
 		glGetProgramiv(program, ERROR_TYPE, &success);
@@ -32,42 +30,42 @@ namespace Vectora {
 		}
 	}
 
-	Shader::Shader(std::string vertexShaderPath, std::string fragmentShaderPath)
-	{
+	OpenGLShader::OpenGLShader(std::string vertexShaderPath, std::string fragmentShaderPath)
+	:Shader("bla", "bla") {
 		loadShaders(vertexShaderPath, fragmentShaderPath);
 	};
 
-	Shader::Shader(unsigned int vertexShaderID, unsigned int fragmentShaderID) {
+	OpenGLShader::OpenGLShader(unsigned int vertexShaderID, unsigned int fragmentShaderID) {
 		this->vertexShader = vertexShaderID;
 		this->fragmentShader = fragmentShaderID;
 	}
 
-	Shader::Shader(std::string vertexShaderPath, unsigned int fragmentShaderID) {
+	OpenGLShader::OpenGLShader(std::string vertexShaderPath, unsigned int fragmentShaderID) {
 		loadVertexShader(vertexShaderPath);
 		this->fragmentShader = fragmentShaderID;
 	}
 
-	Shader::Shader(unsigned int vertexShaderID, std::string fragmentShaderPath) {
+	OpenGLShader::OpenGLShader(unsigned int vertexShaderID, std::string fragmentShaderPath) {
 		this->vertexShader = vertexShaderID;
 		loadFragmentShader(fragmentShaderPath);
 	}
 
-	void Shader::Bind()
+	void OpenGLShader::Bind()
 	{
 		glUseProgram(RenderID);
 	}
 
-	void Shader::UnBind()
+	void OpenGLShader::UnBind()
 	{
 		glUseProgram(0);
 	}
 
-	void Shader::loadShaders(std::string vPath, std::string fPath) {
+	void OpenGLShader::loadShaders(std::string vPath, std::string fPath) {
 		loadVertexShader(vPath);
 		loadFragmentShader(fPath);
 	}
 
-	void Shader::loadVertexShader(std::string vPath) {
+	void OpenGLShader::loadVertexShader(std::string vPath) {
 		vertexShaderSource.clear();
 		std::ifstream vShaderFile(vPath);
 		std::string line;
@@ -82,7 +80,7 @@ namespace Vectora {
 		}
 	}
 
-	void Shader::loadFragmentShader(std::string fPath) {
+	void OpenGLShader::loadFragmentShader(std::string fPath) {
 		fragmentShaderSource.clear();
 		std::ifstream fShaderFile(fPath);
 		std::string line;
@@ -99,7 +97,7 @@ namespace Vectora {
 
 	}
 
-	void Shader::createShaders(ShaderCreationMode mode) {
+	void OpenGLShader::createShaders(ShaderCreationMode mode) {
 
 		if (mode == ShaderCreationMode::BOTH_FROM_FILE)
 		{
@@ -121,11 +119,11 @@ namespace Vectora {
 
 	};
 
-	void Shader::useProgram() {
+	void OpenGLShader::useProgram() {
 		glUseProgram(RenderID);
 	};
 
-	void Shader::compileVertexShader() {
+	void OpenGLShader::compileVertexShader() {
 		vertexShader = glCreateShader(GL_VERTEX_SHADER);
 		const char* vertexSource = vertexShaderSource.c_str();
 		glShaderSource(vertexShader, 1, &vertexSource, NULL);
@@ -133,7 +131,7 @@ namespace Vectora {
 		getShaderCompilationError(vertexShader, GL_COMPILE_STATUS, VERTEX);
 	}
 
-	void Shader::compileFragmentShader() {
+	void OpenGLShader::compileFragmentShader() {
 		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 		const char* fragSource = fragmentShaderSource.c_str();
 		glShaderSource(fragmentShader, 1, &fragSource, NULL);
@@ -141,7 +139,7 @@ namespace Vectora {
 		getShaderCompilationError(fragmentShader, GL_COMPILE_STATUS, FRAGMENT);
 	}
 
-	void Shader::linkShaders() {
+	void OpenGLShader::linkShaders() {
 		RenderID = glCreateProgram();
 		glAttachShader(RenderID, vertexShader);
 		glAttachShader(RenderID, fragmentShader);
@@ -149,28 +147,28 @@ namespace Vectora {
 		getShaderLinkError(RenderID, GL_LINK_STATUS);
 	}
 
-	void Shader::setFloat(const std::string& name, float value) const {
+	void OpenGLShader::setFloat(const std::string& name, float value) const {
 		glUniform1f(glGetUniformLocation(RenderID, name.c_str()), value);
 	}
 
-	void Shader::setBool(const std::string& name, bool value) const {
+	void OpenGLShader::setBool(const std::string& name, bool value) const {
 		glUniform1i(glGetUniformLocation(RenderID, name.c_str()), value);
 	}
-	void Shader::setInt(const std::string& name, int value) const {
+	void OpenGLShader::setInt(const std::string& name, int value) const {
 		glUniform1i(glGetUniformLocation(RenderID, name.c_str()), value);
 	}
 
-	void Shader::setVec2(const std::string& name, float v1, float v2) const {
+	void OpenGLShader::setVec2(const std::string& name, float v1, float v2) const {
 		glUniform2f(glGetUniformLocation(RenderID, name.c_str()), v1, v2);
 	}
 
-	void Shader::setVec4(const std::string& name, const glm::vec4& vec4) const
+	void OpenGLShader::setVec4(const std::string& name, const glm::vec4& vec4) const
 	{
 		glUniform4f(glGetUniformLocation(RenderID, name.c_str()), vec4.x, vec4.y, vec4.z, vec4.w);
 	}
 	;
 
-	void Shader::setMat4(const std::string& name, const glm::mat4& trans) const {
+	void OpenGLShader::setMat4(const std::string& name, const glm::mat4& trans) const {
 		glUniformMatrix4fv(glGetUniformLocation(RenderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(trans));
 	}
 
