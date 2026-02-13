@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # I might need this later
 # This ensures /MD for Release and /MDd for Debug
 # set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL") 
-
 if (WIN32)
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(ENGINE_PLATFORM "Win64")
@@ -22,14 +21,22 @@ elseif (UNIX)
     set(ENGINE_PLATFORM "Linux")
 endif()
 
-foreach(OUTPUTCONFIG Debug Release RelWithDebInfo MinSizeRel)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG}
-        ${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM})
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG}
-        ${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM})
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG}
-        ${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM})
-endforeach()
+set(BASE_OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin/$<CONFIG>-${ENGINE_PLATFORM}")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BASE_OUTPUT_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BASE_OUTPUT_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BASE_OUTPUT_DIR})
+
+
+
+#foreach(OUTPUTCONFIG Debug Release RelWithDebInfo MinSizeRel)
+#    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG}
+#        ${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM})
+#    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG}
+#        ${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM})
+#    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG}
+#        ${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM})
+#endforeach()
 
 
 # Note that, dynamic fetching required libraries like this is not a good idea for production code,
@@ -107,8 +114,6 @@ file(GLOB_RECURSE EDITOR CONFIGURE_DEPENDS
     Vectora_Editor/*.h
 )
 
-
-
 add_library(${VE_ENGINE_TARGET} STATIC ${ENGINE})
 add_dependencies(${VE_ENGINE_TARGET} imgui_static)
 # Include your own headers
@@ -124,7 +129,11 @@ target_compile_definitions(${VE_ENGINE_TARGET}
         $<$<CONFIG:Debug>:VE_ENABLE_ASSERTS>
 )
 
-
+set_target_properties(${VE_ENGINE_TARGET} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${BASE_OUTPUT_DIR}"
+    LIBRARY_OUTPUT_DIRECTORY "${BASE_OUTPUT_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${BASE_OUTPUT_DIR}"
+)
 
 # Link libraries
 target_link_libraries(${VE_ENGINE_TARGET} PUBLIC
@@ -144,20 +153,25 @@ target_include_directories(${VE_EDITOR_TARGET} PRIVATE
     ${CMAKE_SOURCE_DIR}/Vectora_Editor
     ${CMAKE_SOURCE_DIR}/includes
 )
+
+set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${BASE_OUTPUT_DIR}"
+)
+
 target_compile_definitions(${VE_EDITOR_TARGET} PRIVATE VE_BUILD_STATIC VE_PLATFORM_WINDOWS)
 target_link_libraries(${VE_EDITOR_TARGET} PUBLIC ${VE_ENGINE_TARGET})
 
-foreach(OUTPUTCONFIG Debug Release RelWithDebInfo MinSizeRel)
-    string(TOUPPER ${OUTPUTCONFIG} CONFIG_UPPER)
-    set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM}"
-    )
-    set_target_properties(${VE_ENGINE_TARGET} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM}"
-        LIBRARY_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM}"
-        ARCHIVE_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM}"
-    )
-endforeach()
+#foreach(OUTPUTCONFIG Debug Release RelWithDebInfo MinSizeRel)
+#f   string(TOUPPER ${OUTPUTCONFIG} CONFIG_UPPER)
+#f   set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
+#f       RUNTIME_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM}"
+#f   )
+#f   set_target_properties(${VE_ENGINE_TARGET} PROPERTIES
+#f       RUNTIME_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM}"
+#f       LIBRARY_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM}"
+#f       ARCHIVE_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${CMAKE_BINARY_DIR}/bin/${OUTPUTCONFIG}-${ENGINE_PLATFORM}"
+#f   )
+#fndforeach()
 
 # Forcing the cmake build output
 #${CMAKE_BINARY_DIR}/bin/$<CONFIG>-${ENGINE_PLATFORM}
@@ -170,10 +184,10 @@ set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
 add_custom_target(copy_shaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/Vectora_Engine/shaders"
-            "$<TARGET_FILE_DIR:${VE_EDITOR_TARGET}>/shaders"
+            "${BASE_OUTPUT_DIR}/shaders"
 
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/Vectora_Editor/assets"
-            "$<TARGET_FILE_DIR:${VE_EDITOR_TARGET}>/assets"
+            "${BASE_OUTPUT_DIR}/assets"
 )
 add_dependencies(${VE_EDITOR_TARGET} copy_shaders) 

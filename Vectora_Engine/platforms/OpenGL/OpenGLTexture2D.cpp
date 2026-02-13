@@ -25,6 +25,7 @@ namespace Vectora {
 			internalFormat = GL_RGB8;
 			dataFormat = GL_RGB;
 		}
+		VE_CORE_ASSERT(internalFormat & dataFormat, "Format not supported!");
 
 		glGenTextures(1, &m_RendererID);
 		glBindTexture(GL_TEXTURE_2D, m_RendererID);
@@ -35,8 +36,9 @@ namespace Vectora {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		// glTexImage2D does allocation and upload in one go.
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_Width, m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_Width, m_Height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
+		//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
+
 		// Kinda optional
 		glGenerateMipmap(GL_TEXTURE_2D);
 		// 5. Unbind (Optional but good practice)

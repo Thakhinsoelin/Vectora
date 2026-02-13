@@ -1,6 +1,6 @@
 #include "VertexArray.h"
 #include "Renderer.h"
-#include "platforms/OpenGL/OpenGlVertexArray.h"
+#include "platforms/OpenGL/OpenGLVertexArray.h"
 
 namespace Vectora {
 	VertexArray* VertexArray::Create()

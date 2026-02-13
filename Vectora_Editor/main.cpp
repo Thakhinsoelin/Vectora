@@ -17,7 +17,7 @@ public:
 		// OR use reset (which is cleaner if the variable is already declared)
 		//m_BlueShader.reset(Vectora::Shader::Create("shaders/blueRectVt.glsl", "shaders/blueRectFg.glsl"));
 		
-		m_BlueShader = Vectora::Ref<Vectora::Shader>(Vectora::Shader::Create("shaders/blueRectVt.glsl", "shaders/blueRectFg.glsl"));
+		m_BlueShader = Vectora::Ref<Vectora::Shader>(Vectora::Shader::Create("shaders/blueRect.vertex.glsl", "shaders/blueRect.fragment.glsl"));
 		m_BlueShader->createShaders(Vectora::BOTH_FROM_FILE);
 
 		m_TextureShader = Vectora::Ref<Vectora::Shader>(Vectora::Shader::Create("shaders/Texture.vertex.glsl", "shaders/Texture.fragment.glsl"));
@@ -69,7 +69,7 @@ public:
 		m_SquareVA->SetIndexBuffer(squareIB);
 
 		m_Texture = Vectora::Texture2D::Create("assets/textures/Checkerboard.png");
-
+		m_ChernoTexture = Vectora::Texture2D::Create("assets/textures/ChernoLogo.png");
 		std::dynamic_pointer_cast<Vectora::OpenGLShader>(m_TextureShader)->Bind();
 		std::dynamic_pointer_cast<Vectora::OpenGLShader>(m_TextureShader)->setInt("u_Texture", 0);
     }
@@ -146,6 +146,9 @@ public:
 		}
 		m_Texture->Bind();
 		Vectora::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+
+		m_ChernoTexture->Bind();
+		Vectora::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		// This one is triangle
 		// Vectora::Renderer::Submit(m_Shader, m_VertexArray);
 
@@ -184,7 +187,7 @@ private:
 	float m_CubeRotationSpeed = 20.f;
 
 	float ts = 0.f;
-	Vectora::Ref<Vectora::Texture2D> m_Texture;
+	Vectora::Ref<Vectora::Texture2D> m_Texture, m_ChernoTexture;
 	glm::vec4 m_SquareColor = { 0.3f, 0.2f, 0.8f, 1.f};
 };
 
