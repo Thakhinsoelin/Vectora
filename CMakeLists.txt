@@ -171,5 +171,9 @@ add_custom_target(copy_shaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/Vectora_Engine/shaders"
             "$<TARGET_FILE_DIR:${VE_EDITOR_TARGET}>/shaders"
+
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/Vectora_Editor/assets"
+            "$<TARGET_FILE_DIR:${VE_EDITOR_TARGET}>/assets"
 )
 add_dependencies(${VE_EDITOR_TARGET} copy_shaders) 

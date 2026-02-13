@@ -59,9 +59,6 @@ namespace Vectora {
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClosed));
-
-		//if(e.GetEventType() == EventType::MouseButtonPressed || e.GetEventType() == EventType::MouseButtonReleased)
-			//VE_CORE_TRACE("{0}", e);
 		
 		for (auto it = layerstack.end(); it != layerstack.begin(); )
 		{
@@ -88,7 +85,4 @@ namespace Vectora {
 		m_Running = false;
 		return true;
 	}
-
-
-	
 }

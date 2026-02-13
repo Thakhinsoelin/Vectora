@@ -11,19 +11,17 @@ public:
     TestLayer()
     : Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f), m_CubePosition(0.0f)
 	{
-		
-		//m_Shader = std::make_shared<Vectora::Shader>(Vectora::Shader::Create("shaders/vertex.glsl", "shaders/fragment.glsl"));
 		// Correct way to wrap a factory-created raw pointer into a shared_ptr
 		m_Shader = Vectora::Ref<Vectora::Shader>(Vectora::Shader::Create("shaders/vertex.glsl", "shaders/fragment.glsl"));
-
+		m_Shader->createShaders(Vectora::BOTH_FROM_FILE);
 		// OR use reset (which is cleaner if the variable is already declared)
 		//m_BlueShader.reset(Vectora::Shader::Create("shaders/blueRectVt.glsl", "shaders/blueRectFg.glsl"));
-		m_Shader->createShaders(Vectora::BOTH_FROM_FILE);
-		m_Shader->Bind();
 		
 		m_BlueShader = Vectora::Ref<Vectora::Shader>(Vectora::Shader::Create("shaders/blueRectVt.glsl", "shaders/blueRectFg.glsl"));
 		m_BlueShader->createShaders(Vectora::BOTH_FROM_FILE);
 
+		m_TextureShader = Vectora::Ref<Vectora::Shader>(Vectora::Shader::Create("shaders/Texture.vertex.glsl", "shaders/Texture.fragment.glsl"));
+		m_TextureShader->createShaders(Vectora::BOTH_FROM_FILE);
 
 		float vertices[] = {
 			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
@@ -32,7 +30,6 @@ public:
 		};
 
 		m_VertexArray.reset(Vectora::VertexArray::Create());
-
 
 		Vectora::BufferLayout layout = {
 			{ Vectora::ShaderDataType::Float3, "a_Position" },
@@ -51,24 +48,30 @@ public:
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
 		m_SquareVA.reset(Vectora::VertexArray::Create());
-		float squareVertices[3 * 4] = {
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.5f,  0.5f, 0.0f,
-			-0.5f,  0.5f, 0.0f
+		float squareVertices[] = {
+			-0.5f, -0.5f, 0.0f, 0.f, 0.f,
+			 0.5f, -0.5f, 0.0f, 1.f, 0.f,
+			 0.5f,  0.5f, 0.0f, 1.f, 1.f,
+			-0.5f,  0.5f, 0.0f, 0.f, 1.f,
 		};
 
 		Vectora::Ref<Vectora::VertexBuffer> squareVB;
 		squareVB.reset(Vectora::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
 		squareVB->SetLayout({
-			{ Vectora::ShaderDataType::Float3, "a_Position" }
-			});
+			{ Vectora::ShaderDataType::Float3, "a_Position" },
+			{ Vectora::ShaderDataType::Float2, "a_TexCoord" }
+		});
 		m_SquareVA->AddVertexBuffer(squareVB);
 
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
 		Vectora::Ref<Vectora::IndexBuffer> squareIB;
 		squareIB.reset(Vectora::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 		m_SquareVA->SetIndexBuffer(squareIB);
+
+		m_Texture = Vectora::Texture2D::Create("assets/textures/Checkerboard.png");
+
+		std::dynamic_pointer_cast<Vectora::OpenGLShader>(m_TextureShader)->Bind();
+		std::dynamic_pointer_cast<Vectora::OpenGLShader>(m_TextureShader)->setInt("u_Texture", 0);
     }
 
     void OnImGuiRender() override
@@ -76,10 +79,18 @@ public:
 		ImGui::Begin("Settings");
 		ImGui::ColorEdit4("SquareColor", glm::value_ptr(m_SquareColor));
 		ImGui::End();
+
+		ImGui::Begin("Renderer");
+		ImGui::Text("Time taken in milliseconds: %f\n", ts);
+		ImGui::TextColored({0.f, 1.0, 0.f, 1.0f}, "Opengl info\n");
+		ImGui::TextColored({ 0.f, 1.0, 0.f, 1.0f }, "Vendor: %s\n", (const char*)glGetString(GL_VENDOR));
+		ImGui::TextColored({ 0.f, 1.0, 0.f, 1.0f }, "Renderer: %s\n", (const char*)glGetString(GL_RENDERER));
+		ImGui::TextColored({ 0.f, 1.0, 0.f, 1.0f }, "Version: %s\n", (const char*)glGetString(GL_VERSION));
+		ImGui::End();
+
     }
     void OnUpdate(Vectora::Timestep ts) override {
-		
-		VE_TRACE("time: {0}", ts.GetMilliseconds());
+		this->ts = ts.GetMilliseconds();
 		if (Vectora::Input::IsKeyPressed(VE_KEY_LEFT))
 			m_CameraPosition.x += m_CameraMoveSpeed * ts;
 		else if (Vectora::Input::IsKeyPressed(VE_KEY_RIGHT))
@@ -98,9 +109,9 @@ public:
 		else if (Vectora::Input::IsKeyPressed(VE_KEY_I))
 			m_CubePosition.y += m_CubeMoveSpeed * ts;
 
-		if (Vectora::Input::IsKeyPressed(VE_KEY_A))
+		if (Vectora::Input::IsKeyPressed(VE_KEY_U))
 			m_CubeRotation += m_CubeRotationSpeed * ts;
-		else if (Vectora::Input::IsKeyPressed(VE_KEY_D))
+		else if (Vectora::Input::IsKeyPressed(VE_KEY_O))
 			m_CubeRotation -= m_CubeRotationSpeed * ts;
 
 		if (Vectora::Input::IsKeyPressed(VE_KEY_A))
@@ -133,9 +144,10 @@ public:
 				Vectora::Renderer::Submit(m_BlueShader, m_SquareVA, transform);
 			}
 		}
-
-		
-		Vectora::Renderer::Submit(m_Shader, m_VertexArray);
+		m_Texture->Bind();
+		Vectora::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		// This one is triangle
+		// Vectora::Renderer::Submit(m_Shader, m_VertexArray);
 
 		Vectora::Renderer::EndScene();
     }
@@ -159,7 +171,7 @@ private:
 	Vectora::Ref<Vectora::Shader> m_Shader;
 					
 	Vectora::Ref<Vectora::VertexArray> m_SquareVA;
-	Vectora::Ref<Vectora::Shader> m_BlueShader;
+	Vectora::Ref<Vectora::Shader> m_BlueShader, m_TextureShader;
 
 	glm::vec3 m_CameraPosition;
 	float m_CameraMoveSpeed = 1.f;
@@ -171,7 +183,9 @@ private:
 	float m_CubeRotation = 0.f;
 	float m_CubeRotationSpeed = 20.f;
 
-	glm::vec4 m_SquareColor = { 0.8f, 0.2f, 0.3f, 1.f};
+	float ts = 0.f;
+	Vectora::Ref<Vectora::Texture2D> m_Texture;
+	glm::vec4 m_SquareColor = { 0.3f, 0.2f, 0.8f, 1.f};
 };
 
 class SandBox : public Vectora::Application {
