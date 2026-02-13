@@ -32,9 +32,9 @@ namespace Vectora {
 	}
 
 	OpenGLShader::OpenGLShader(std::string vertexShaderPath, std::string fragmentShaderPath)
-	 {
+	{
 		loadShaders(vertexShaderPath, fragmentShaderPath);
-	};
+	}
 
 	OpenGLShader::OpenGLShader(unsigned int vertexShaderID, unsigned int fragmentShaderID) {
 		this->vertexShader = vertexShaderID;
@@ -51,7 +51,7 @@ namespace Vectora {
 		loadFragmentShader(fragmentShaderPath);
 	}
 
-	void OpenGLShader::Bind() const 
+	void OpenGLShader::Bind() const
 	{
 		glUseProgram(RenderID);
 	}
@@ -172,7 +172,7 @@ namespace Vectora {
 	{
 		glUniform4f(glGetUniformLocation(RenderID, name.c_str()), vec4.x, vec4.y, vec4.z, vec4.w);
 	}
-	
+
 
 	void OpenGLShader::setMat4(const std::string& name, const glm::mat4& trans) const {
 		glUniformMatrix4fv(glGetUniformLocation(RenderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(trans));

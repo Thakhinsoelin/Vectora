@@ -16,6 +16,7 @@
 #include "Renderer/RenderCommand.h"
 #include "Renderer/Shader.h"
 #include "Renderer/VertexArray.h"
+#include "Renderer/Texture.h"
 #include "OrthographiCamera.h"
 #include "Core/Timestep.h"
 //----------------------------------------
