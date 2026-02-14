@@ -5,6 +5,39 @@
 #include <imgui/ImGuiLayer.h>
 #include <glm/vec4.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <windows.h>
+#include <shobjidl.h> 
+#include <string>
+
+std::string OpenFileDialog()
+{
+	IFileOpenDialog* pFileOpen = nullptr;
+	std::string result;
+
+	if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL,
+		CLSCTX_ALL, IID_IFileOpenDialog, (void**)&pFileOpen)))
+	{
+		if (SUCCEEDED(pFileOpen->Show(NULL)))
+		{
+			IShellItem* pItem;
+			if (SUCCEEDED(pFileOpen->GetResult(&pItem)))
+			{
+				PWSTR pszFilePath = nullptr;
+				if (SUCCEEDED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath)))
+				{
+					char path[MAX_PATH];
+					wcstombs(path, pszFilePath, MAX_PATH);
+					result = path;
+					CoTaskMemFree(pszFilePath);
+				}
+				pItem->Release();
+			}
+		}
+		pFileOpen->Release();
+	}
+
+	return result;
+}
 
 class TestLayer : public Vectora::Layer {
 public:
@@ -79,6 +112,12 @@ public:
     {
 		ImGui::Begin("Settings");
 		ImGui::ColorEdit4("SquareColor", glm::value_ptr(m_SquareColor));
+		/*if (ImGui::Button("Choose File", { 100, 50 })) {
+			std::string path = OpenFileDialog();
+			if (!path.empty()) {
+				m_ChernoTexture = Vectora::Texture2D::Create(path);
+			}
+		};*/
 		ImGui::End();
 
 		ImGui::Begin("Renderer");
@@ -181,6 +220,8 @@ private:
 	float m_CameraMoveSpeed = 1.f;
 	float m_CameraRotation = 0.f;
 	float m_CameraRotationSpeed = 180.f;
+
+	std::string filePath;
 
 	glm::vec3 m_CubePosition;
 	float m_CubeMoveSpeed = 10.f;
