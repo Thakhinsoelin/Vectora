@@ -179,7 +179,7 @@ public:
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos ) * scale;
 				transform = glm::translate(transform, m_CubePosition);
-				transform = glm::rotate(transform, glm::radians(m_CubeRotation), glm::vec3(0.0f, 1.0f, 0.0f));
+				transform = glm::rotate(transform, glm::radians(m_CubeRotation), glm::vec3(0.0f, 0.0f, 1.0f));
 				
 				Vectora::Renderer::Submit(m_BlueShader, m_SquareVA, transform);
 			}

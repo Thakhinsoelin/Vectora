@@ -68,22 +68,23 @@ namespace Vectora {
 
 	void OpenGLShader::loadVertexShader(std::string vPath) {
 		vertexShaderSource.clear();
-		std::ifstream vShaderFile(vPath);
+		std::ifstream vShaderFile(vPath, std::ios::in, std::ios::binary);
 		std::string line;
 		if (vShaderFile) {
 			std::stringstream vShaderStream;
 			vShaderStream << vShaderFile.rdbuf();
 			vertexShaderSource = vShaderStream.str();
 			vShaderFile.close();
+			
 		}
 		else {
-			printf("Failed to open: %s\n", vPath.c_str());
+			VE_CORE_ERROR("Could not open file {0}", vPath);
 		}
 	}
 
 	void OpenGLShader::loadFragmentShader(std::string fPath) {
 		fragmentShaderSource.clear();
-		std::ifstream fShaderFile(fPath);
+		std::ifstream fShaderFile(fPath, std::ios::in, std::ios::binary);
 		std::string line;
 
 		if (fShaderFile) {
@@ -93,7 +94,7 @@ namespace Vectora {
 			fShaderFile.close();
 		}
 		else {
-			printf("Failed to open fragment shader file at path: %s\n", fPath.c_str());
+			VE_CORE_ERROR("Could not open file {0}", fPath);
 		}
 
 	}
