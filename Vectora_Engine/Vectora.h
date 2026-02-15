@@ -9,6 +9,8 @@
 #include "KeyCodes.h"
 #include "Input.h"
 
+#include "OrthographiCamera.h"
+#include "OrthographicCameraController.h"
 //------------Renderer-------------------
 #include "Renderer/Buffer.h"
 #include "Renderer/GraphicsContext.h"
@@ -17,7 +19,6 @@
 #include "Renderer/Shader.h"
 #include "Renderer/VertexArray.h"
 #include "Renderer/Texture.h"
-#include "OrthographiCamera.h"
 #include "Core/Timestep.h"
 //----------------------------------------
 

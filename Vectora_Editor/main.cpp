@@ -5,44 +5,42 @@
 #include <imgui/ImGuiLayer.h>
 #include <glm/vec4.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <windows.h>
-#include <shobjidl.h> 
 #include <string>
 
-std::string OpenFileDialog()
-{
-	IFileOpenDialog* pFileOpen = nullptr;
-	std::string result;
-
-	if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL,
-		CLSCTX_ALL, IID_IFileOpenDialog, (void**)&pFileOpen)))
-	{
-		if (SUCCEEDED(pFileOpen->Show(NULL)))
-		{
-			IShellItem* pItem;
-			if (SUCCEEDED(pFileOpen->GetResult(&pItem)))
-			{
-				PWSTR pszFilePath = nullptr;
-				if (SUCCEEDED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath)))
-				{
-					char path[MAX_PATH];
-					wcstombs(path, pszFilePath, MAX_PATH);
-					result = path;
-					CoTaskMemFree(pszFilePath);
-				}
-				pItem->Release();
-			}
-		}
-		pFileOpen->Release();
-	}
-
-	return result;
-}
+//std::string OpenFileDialog()
+//{
+//	IFileOpenDialog* pFileOpen = nullptr;
+//	std::string result;
+//
+//	if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL,
+//		CLSCTX_ALL, IID_IFileOpenDialog, (void**)&pFileOpen)))
+//	{
+//		if (SUCCEEDED(pFileOpen->Show(NULL)))
+//		{
+//			IShellItem* pItem;
+//			if (SUCCEEDED(pFileOpen->GetResult(&pItem)))
+//			{
+//				PWSTR pszFilePath = nullptr;
+//				if (SUCCEEDED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath)))
+//				{
+//					char path[MAX_PATH];
+//					wcstombs(path, pszFilePath, MAX_PATH);
+//					result = path;
+//					CoTaskMemFree(pszFilePath);
+//				}
+//				pItem->Release();
+//			}
+//		}
+//		pFileOpen->Release();
+//	}
+//
+//	return result;
+//}
 
 class TestLayer : public Vectora::Layer {
 public:
     TestLayer()
-    : Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f), m_CubePosition(0.0f)
+    : Layer("Example"), m_CameraController(1280.f / 720.f, true), m_CubePosition(0.0f)
 	{
 		// Correct way to wrap a factory-created raw pointer into a shared_ptr
 		m_Shader = Vectora::Ref<Vectora::Shader>(Vectora::Shader::Create("shaders/vertex.glsl", "shaders/fragment.glsl"));
@@ -131,41 +129,14 @@ public:
     }
     void OnUpdate(Vectora::Timestep ts) override {
 		this->ts = ts.GetMilliseconds();
-		if (Vectora::Input::IsKeyPressed(VE_KEY_LEFT))
-			m_CameraPosition.x += m_CameraMoveSpeed * ts;
-		else if (Vectora::Input::IsKeyPressed(VE_KEY_RIGHT))
-			m_CameraPosition.x -= m_CameraMoveSpeed * ts;
-		if (Vectora::Input::IsKeyPressed(VE_KEY_DOWN))
-			m_CameraPosition.y += m_CameraMoveSpeed * ts;
-		else if (Vectora::Input::IsKeyPressed(VE_KEY_UP))
-			m_CameraPosition.y -= m_CameraMoveSpeed * ts;
-
-		if (Vectora::Input::IsKeyPressed(VE_KEY_J))
-			m_CubePosition.x -= m_CubeMoveSpeed * ts;
-		else if (Vectora::Input::IsKeyPressed(VE_KEY_L))
-			m_CubePosition.x += m_CubeMoveSpeed * ts;
-		if (Vectora::Input::IsKeyPressed(VE_KEY_K))
-			m_CubePosition.y -= m_CubeMoveSpeed * ts;
-		else if (Vectora::Input::IsKeyPressed(VE_KEY_I))
-			m_CubePosition.y += m_CubeMoveSpeed * ts;
-
-		if (Vectora::Input::IsKeyPressed(VE_KEY_U))
-			m_CubeRotation += m_CubeRotationSpeed * ts;
-		else if (Vectora::Input::IsKeyPressed(VE_KEY_O))
-			m_CubeRotation -= m_CubeRotationSpeed * ts;
-
-		if (Vectora::Input::IsKeyPressed(VE_KEY_A))
-			m_CameraRotation += m_CameraRotationSpeed * ts;
-		else if (Vectora::Input::IsKeyPressed(VE_KEY_D))
-			m_CameraRotation -= m_CameraRotationSpeed * ts;
+		
+		m_CameraController.OnUpdate(ts);
 
 		Vectora::RenderCommand::SetClearColor({ 0.1, 0.1, 0.1, 1 });
 		Vectora::RenderCommand::Clear();
 
-		m_Camera.SetPosition(m_CameraPosition);
-		m_Camera.SetRotation(m_CameraRotation);
 
-		Vectora::Renderer::BeginScence(m_Camera);
+		Vectora::Renderer::BeginScence(m_CameraController.GetCamera());
 		
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
@@ -198,6 +169,8 @@ public:
     void OnEvent(Vectora::Event& event) override {
 		Vectora::EventDispatcher dispatch(event);
 		dispatch.Dispatch<Vectora::KeyPressedEvent>(VE_BIND_EVENT_FN(TestLayer::OnEscapePressed));
+
+		m_CameraController.OnEvent(event);
     }
 
 	bool OnEscapePressed(Vectora::KeyPressedEvent& event) {
@@ -208,7 +181,7 @@ public:
 		return true;
 	}
 private:
-	Vectora::OrthoGraphicCamera m_Camera;
+	Vectora::OrthographicCameraController m_CameraController;
 
 	Vectora::Ref<Vectora::VertexArray> m_VertexArray;
 	Vectora::Ref<Vectora::Shader> m_Shader;
@@ -216,10 +189,6 @@ private:
 	Vectora::Ref<Vectora::VertexArray> m_SquareVA;
 	Vectora::Ref<Vectora::Shader> m_BlueShader, m_TextureShader;
 
-	glm::vec3 m_CameraPosition;
-	float m_CameraMoveSpeed = 1.f;
-	float m_CameraRotation = 0.f;
-	float m_CameraRotationSpeed = 180.f;
 
 	std::string filePath;
 

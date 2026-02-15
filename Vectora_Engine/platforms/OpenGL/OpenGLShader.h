@@ -14,6 +14,8 @@ namespace Vectora {
 		OpenGLShader(unsigned int vertexShaderID, std::string fragmentShaderPath);
 		~OpenGLShader() {
 			glDeleteProgram(RenderID);
+			glDeleteShader(vertexShader);
+			glDeleteShader(fragmentShader); 
 			// You can also delete the shaders themselves after linking
 		}
 

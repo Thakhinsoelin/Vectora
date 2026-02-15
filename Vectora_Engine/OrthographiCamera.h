@@ -7,6 +7,9 @@ namespace Vectora {
 	public:
 
 		OrthoGraphicCamera(float left, float right, float bottom, float top);
+		
+		void SetProjection(float left, float right, float top, float bottom);
+
 		~OrthoGraphicCamera();
 		virtual const glm::mat4& GetProjection() const override;
 		virtual const glm::mat4& GetPV() const override;
@@ -14,6 +17,7 @@ namespace Vectora {
 		virtual float GetRotation(void) const override final;
 		void SetPosition(glm::vec3 dir);
 		virtual const glm::vec3& GetPosition() const override final;
+
 
 	private:
 		void RecalculateViewMatrix();

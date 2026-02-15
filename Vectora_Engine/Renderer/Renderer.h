@@ -10,6 +10,8 @@ namespace Vectora {
 	{
 	public:
 		static void Init();
+		static void OnWindowResize(uint32_t width, uint32_t height);
+
 		static void BeginScence(OrthoGraphicCamera& camera);
 		static void EndScene();
 

@@ -44,8 +44,11 @@ namespace Vectora {
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			for (auto& layer : layerstack)
-				layer->OnUpdate(timestep);
+			if(!m_Minimized)
+			{
+				for (auto& layer : layerstack)
+					layer->OnUpdate(timestep);
+			}
 			
 			m_ImguiLayer->Begin();
 			for (Layer* layer: layerstack)
@@ -62,7 +65,7 @@ namespace Vectora {
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClosed));
-		
+		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResized));
 		for (auto it = layerstack.end(); it != layerstack.begin(); )
 		{
 			(*--it)->OnEvent(e);
@@ -87,5 +90,17 @@ namespace Vectora {
 	{
 		m_Running = false;
 		return true;
+	}
+	bool Application::OnWindowResized(WindowResizeEvent& e)
+	{
+		if (e.GetWidth() == 0 || e.GetHeight() == 0)
+		{
+			m_Minimized = true;
+			return false;
+		}
+
+		m_Minimized = false;
+		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+		return false;
 	}
 }

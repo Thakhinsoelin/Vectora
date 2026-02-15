@@ -26,7 +26,7 @@ namespace Vectora {
 		void PushOverlay(Layer* overlay);
 
 		bool OnWindowClosed(WindowCloseEvent& e);
-
+		bool OnWindowResized(WindowResizeEvent& e);
 		inline Window& GetWindow() { return *window; }
 
 		inline static Application& Get() { return *s_Instance; }
@@ -39,6 +39,7 @@ namespace Vectora {
 		ImGuiLayer* m_ImguiLayer;
 		LayerStack layerstack;
 		bool m_Running = true;
+		bool m_Minimized = false;
 		static Application* s_Instance;
 		
 		float m_LastFrameTime = 0.f;
