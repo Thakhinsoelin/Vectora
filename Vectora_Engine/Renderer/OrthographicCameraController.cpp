@@ -68,6 +68,7 @@ namespace Vectora {
 	}
 	bool OrthographicCameraController::OnWindowResized(WindowResizeEvent& e)
 	{
+		VE_CORE_INFO("Aspect Ratio: {0} (W: {1}, H: {2})", m_AspectRatio, e.GetWidth(), e.GetHeight());
 		m_AspectRatio = (float)e.GetWidth() / (float)e.GetHeight();
 		m_Camera.SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 		return false;

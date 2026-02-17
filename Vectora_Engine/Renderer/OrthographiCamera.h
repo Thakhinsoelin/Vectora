@@ -8,7 +8,7 @@ namespace Vectora {
 
 		OrthoGraphicCamera(float left, float right, float bottom, float top);
 		
-		void SetProjection(float left, float right, float top, float bottom);
+		void SetProjection(float left, float right, float bottom, float top);
 
 		~OrthoGraphicCamera();
 		virtual const glm::mat4& GetProjection() const override;

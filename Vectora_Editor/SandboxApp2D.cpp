@@ -25,17 +25,26 @@ void Sandbox2D::OnDetach()
 void Sandbox2D::OnUpdate(Vectora::Timestep ts)
 {
 	// Update
-	m_CameraController.OnUpdate(ts);
+	{
+		VE_PROFILE_SCOPE("CameraController::OnUpdate");
+		m_CameraController.OnUpdate(ts);
+	}
 
 	// Render
-	Vectora::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-	Vectora::RenderCommand::Clear();
+	{
+		VE_PROFILE_SCOPE("Renderer Prep");
+		Vectora::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+		Vectora::RenderCommand::Clear();
+	}
 	
-	Vectora::Renderer2D::BeginScene(m_CameraController.GetCamera());
-	Vectora::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
-	Vectora::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.2f, 0.3f, 0.8f, 1.0f });
-	Vectora::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, m_CheckerboardTexture);
-	Vectora::Renderer2D::EndScene();
+	{
+		VE_PROFILE_SCOPE("Renderer Draw");
+		Vectora::Renderer2D::BeginScene(m_CameraController.GetCamera());
+		Vectora::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
+		Vectora::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.2f, 0.3f, 0.8f, 1.0f });
+		Vectora::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, m_CheckerboardTexture);
+		Vectora::Renderer2D::EndScene();
+	}
 
 	// TODO: Add these functions - Shader::SetMat4, Shader::SetFloat4
 	// std::dynamic_pointer_cast<Vectora::OpenGLShader>(m_FlatColorShader)->Bind();
@@ -44,8 +53,17 @@ void Sandbox2D::OnUpdate(Vectora::Timestep ts)
 
 void Sandbox2D::OnImGuiRender()
 {
+	VE_PROFILE_FUNCTION();
 	ImGui::Begin("Settings");
 	ImGui::ColorEdit4("Square Color", glm::value_ptr(m_SquareColor));
+	ImGui::End();
+
+	ImGui::Begin("Renderer");
+	/*ImGui::Text("Time taken in milliseconds: %f\n", ts);*/
+	ImGui::TextColored({ 0.f, 1.0, 0.f, 1.0f }, "Opengl info\n");
+	ImGui::TextColored({ 0.f, 1.0, 0.f, 1.0f }, "Vendor: %s\n", (const char*)glGetString(GL_VENDOR));
+	ImGui::TextColored({ 0.f, 1.0, 0.f, 1.0f }, "Renderer: %s\n", (const char*)glGetString(GL_RENDERER));
+	ImGui::TextColored({ 0.f, 1.0, 0.f, 1.0f }, "Version: %s\n", (const char*)glGetString(GL_VERSION));
 	ImGui::End();
 }
 

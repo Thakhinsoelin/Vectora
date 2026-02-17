@@ -15,8 +15,8 @@ namespace Vectora {
 	static void GLFWErrorCallback(int error, const char* desc) {
 		VE_CORE_ERROR("GLFW Error ({0}): ({1})", error, desc);
 	}
-	Window* Window::Create(const WindowProps& prop) {
-		return new WindowsWindow(prop);
+	Scope<Window> Window::Create(const WindowProps& prop) {
+		return CreateScope<WindowsWindow>(prop);
 	}
 
 	WindowsWindow::WindowsWindow(const WindowProps& props)
@@ -66,7 +66,8 @@ namespace Vectora {
 		}
 		m_Window = glfwCreateWindow(prop.width, prop.height, prop.title, nullptr, nullptr);
 		++s_GLFWWindowCount;
-		m_Context = CreateScope<OpenGLContext>(m_Window);
+
+		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);

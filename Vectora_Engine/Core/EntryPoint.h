@@ -5,13 +5,18 @@ extern Vectora::Application* Vectora::CreateApplication();
 
 int main(int argc, char** argv) {
     Vectora::Log::Init();
-    VE_CORE_WARN("initialied!");
-    int a = 3;
-    VE_INFO("Hello var={0}", a);
-    auto app = Vectora::CreateApplication();
-    app->Run();
 
+    VE_PROFILE_BEGIN_SESSION("Startup", "VectoraProfile-Startup.json");
+    auto app = Vectora::CreateApplication();
+    VE_PROFILE_END_SESSION();
+
+    VE_PROFILE_BEGIN_SESSION("Runtime", "VectoraProfile-Runtime.json");
+    app->Run();
+    VE_PROFILE_END_SESSION();
+
+    VE_PROFILE_BEGIN_SESSION("Startup", "VectoraProfile-Shutdown.json");
     delete app;
+    VE_PROFILE_END_SESSION();
     return 0;
 }
 #endif

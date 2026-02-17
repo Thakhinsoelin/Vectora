@@ -21,4 +21,5 @@
 #include "Renderer/VertexArray.h"
 #include "Renderer/Texture.h"
 #include "Core/Timestep.h"
+#include "Debug/Instrumentor.h"
 //----------------------------------------

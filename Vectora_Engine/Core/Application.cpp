@@ -1,18 +1,19 @@
-#include "Application.h"
+#include "Core/Application.h"
 #include "vpch.h"
 #include "Events/Event.h"
-#include "Input.h"
+#include "Core/Input.h"
 #include "Events/ApplicationEvent.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/RenderCommand.h"
 #include <imgui.h>
-#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
+//#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
 // This is stupid. C++ 20 magic
 auto do_something() -> auto {
-	return Vectora::Application();
+	return 2;
+	//return Vectora::Application();
 }
 
 namespace Vectora {
@@ -22,9 +23,9 @@ namespace Vectora {
 	{
 		VE_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
-		window = std::unique_ptr<Window>(Window::Create(/*WindowProps("test",800, 800 ))*/));
+		window = Window::Create();
 		window->SetVSync(false);
-		window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+		window->SetEventCallback(VE_BIND_EVENT_FN(Application::OnEvent));
 		//keep track this
 		//layerstack = LayerStack();
 		Renderer::Init();
@@ -35,7 +36,7 @@ namespace Vectora {
 
 	Application::~Application()
 	{
-
+		Renderer::Shutdown();
 	}
 
 	void Application::Run()
@@ -65,8 +66,8 @@ namespace Vectora {
 	void Application::OnEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClosed));
-		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResized));
+		dispatcher.Dispatch<WindowCloseEvent>(VE_BIND_EVENT_FN(Application::OnWindowClosed));
+		dispatcher.Dispatch<WindowResizeEvent>(VE_BIND_EVENT_FN(Application::OnWindowResized));
 		for (auto it = layerstack.end(); it != layerstack.begin(); )
 		{
 			(*--it)->OnEvent(e);
