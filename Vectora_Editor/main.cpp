@@ -40,14 +40,14 @@ public:
 		};
 
 		Vectora::Ref<Vectora::VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(Vectora::VertexBuffer::Create(vertices, sizeof(vertices)));
+		vertexBuffer = Vectora::VertexBuffer::Create(vertices, sizeof(vertices));
 
 		vertexBuffer->SetLayout(layout);
 		m_VertexArray->AddVertexBuffer(vertexBuffer);
 
 		uint32_t indices[3] = { 0, 1, 2 };
 		Vectora::Ref<Vectora::IndexBuffer> indexBuffer;
-		indexBuffer.reset(Vectora::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		indexBuffer = Vectora::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
 		m_SquareVA = Vectora::VertexArray::Create();
@@ -59,7 +59,7 @@ public:
 		};
 
 		Vectora::Ref<Vectora::VertexBuffer> squareVB;
-		squareVB.reset(Vectora::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		squareVB = Vectora::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
 		squareVB->SetLayout({
 			{ Vectora::ShaderDataType::Float3, "a_Position" },
 			{ Vectora::ShaderDataType::Float2, "a_TexCoord" }
@@ -68,7 +68,7 @@ public:
 
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
 		Vectora::Ref<Vectora::IndexBuffer> squareIB;
-		squareIB.reset(Vectora::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+		squareIB = Vectora::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
 		m_SquareVA->SetIndexBuffer(squareIB);
 
 		m_Texture = Vectora::Texture2D::Create("assets/textures/Checkerboard.png");
