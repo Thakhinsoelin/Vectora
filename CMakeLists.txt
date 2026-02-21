@@ -105,6 +105,7 @@ file(GLOB_RECURSE ENGINE CONFIGURE_DEPENDS
     Vectora_Engine/*.cpp
     Vectora_Engine/*.c
     Vectora_Engine/*.h
+    Vectora_Engine/*.hpp
     Vectora_Engine/*.glsl # adding the glsl files to your target makes cmake also track that files so after the shader gets modified, cmake generation gets triggered again
 )
 
@@ -112,6 +113,7 @@ file(GLOB_RECURSE EDITOR CONFIGURE_DEPENDS
     Vectora_Editor/*.cpp
     Vectora_Editor/*.c
     Vectora_Editor/*.h
+    Vectora_Editor/*.hpp
 )
 
 add_library(${VE_ENGINE_TARGET} STATIC ${ENGINE})

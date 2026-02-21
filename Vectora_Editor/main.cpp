@@ -6,7 +6,9 @@
 #include <glm/vec4.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
+
 #include "SandboxApp2D.h"
+#include "FlappyBird.hpp"
 
 //-----------Entry Point------------//
 #include "Core/EntryPoint.h"
@@ -174,7 +176,8 @@ class SandBox : public Vectora::Application {
 public:
     SandBox() {
 		//PushLayer(new TestLayer() );
-		PushLayer(new Sandbox2D());
+		//PushLayer(new Sandbox2D());
+		PushLayer(new BackGround());
         // SYNC CONTEXT: This prevents the Segfault.
 		// Only turns this on if you were building the core as a dll and linking to your app dynamically.
         /*auto* imguiLayer = (Vectora::ImGuiLayer*)Vectora::ImGuiLayer::GetImguiLayerInstance();
