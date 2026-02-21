@@ -17,7 +17,7 @@ namespace Vectora {
 
 		virtual void OnAttach() override final;
 		virtual void OnDetach() override final;
-		
+		virtual void OnEvent(Event& e) override final;
 
 		void Begin();
 		void End();

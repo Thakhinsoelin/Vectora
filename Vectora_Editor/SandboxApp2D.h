@@ -28,6 +28,6 @@ private:
 		const char* Name;
 		float Time;
 	};
-
+	float fps;
 	std::vector<ProfileResult> m_ProfileResults;
 };

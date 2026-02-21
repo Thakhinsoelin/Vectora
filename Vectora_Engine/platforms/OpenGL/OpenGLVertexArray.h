@@ -17,7 +17,7 @@ namespace Vectora {
 		virtual const Ref<IndexBuffer>& GetIndexBuffer() const override final;
 	private:
 		VE_UINT32 m_RendererID;
-		VE_UINT32 m_VertexBufferOffset = 0;
+		VE_UINT32 m_VertexBufferIndex = 0;
 		std::vector<Ref<VertexBuffer>> m_VertexBuffers;
 		Ref<IndexBuffer> m_IndexBuffer;
 	};

@@ -28,6 +28,7 @@ void Sandbox2D::OnDetach()
 
 void Sandbox2D::OnUpdate(Vectora::Timestep ts)
 {
+	fps = 1 / ts.GetSeconds();
 	VE_PROFILE_FUNCTION();
 	// Update
 	{
@@ -75,6 +76,7 @@ void Sandbox2D::OnImGuiRender()
 	VE_PROFILE_FUNCTION();
 	ImGui::Begin("Settings");
 	auto stats = Vectora::Renderer2D::GetStats();
+	ImGui::Text("Frames per second %f: ", fps);
 	ImGui::Text("Renderer2D Stats:");
 	ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 	ImGui::Text("Quads: %d", stats.QuadCount);

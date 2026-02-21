@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     app->Run();
     VE_PROFILE_END_SESSION();
 
-    VE_PROFILE_BEGIN_SESSION("Startup", "VectoraProfile-Shutdown.json");
+    VE_PROFILE_BEGIN_SESSION("Shutdown", "VectoraProfile-Shutdown.json");
     delete app;
     VE_PROFILE_END_SESSION();
     return 0;
