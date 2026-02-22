@@ -42,13 +42,48 @@ public:
 	void OnEvent(Vectora::Event& e) override;
 
 private:
+	bool OnWindowResize(Vectora::WindowResizeEvent& e);
+
+private:
 	glm::vec2 pos = { 0.f, 0.f };
 	float backgroundSpeed = 0.4f;
 	Vectora::OrthographicCameraController m_CameraController;
 	Vectora::Ref<Vectora::Texture2D> m_BackgroundTexture;
 	Vectora::Ref<Vectora::Texture2D> m_GroundTexture;
-
+	/*float m_LastUpdateEndTime = 0.f;*/
 	float fps;
+};
+
+struct Pipe {
+	glm::vec2 Position;
+	float GapY;      // The center point of the gap
+	float GapSize;   // How big the opening is
+	bool Scored;     // To keep track if the bird passed it
+};
+
+
+
+class TileLayer : public Vectora::Layer {
+public:
+	TileLayer();
+	virtual ~TileLayer() = default;
+
+	virtual void OnAttach() override;
+	virtual void OnDetach() override;
+
+	void OnUpdate(Vectora::Timestep ts) override;
+	virtual void OnImGuiRender() override;
+	void OnEvent(Vectora::Event& e) override;
+
+private:
+	glm::vec2 pos = { 0.f, 0.f };
+	float tileSpeed = 0.4f;
+	Vectora::OrthographicCameraController m_CameraController;
+	Vectora::Ref<Vectora::Texture2D> m_TileTexture;
+
+	std::vector<Pipe> m_Pipes;
+	float m_PipeSpawnX = 2.0f; // Start spawning pipes just off-screen
+	const float m_PipeSpacing = 1.5f; // Horizontal distance between pipes
 };
 
 class FlappyBird : public Vectora::Layer
@@ -76,6 +111,7 @@ private:
 		float Time;
 	};
 	float fps;
+	
 	std::vector<ProfileResult> m_ProfileResults;
 };
 

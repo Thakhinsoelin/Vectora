@@ -27,7 +27,7 @@ namespace Vectora {
 		VE_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 		window = Window::Create({ "Test", 600,600 });
-		window->SetVSync(false);
+		window->SetVSync(true);
 		window->SetEventCallback(VE_BIND_EVENT_FN(Application::OnEvent));
 		//keep track this
 		//layerstack = LayerStack();
