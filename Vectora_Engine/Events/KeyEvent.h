@@ -24,7 +24,7 @@ namespace Vectora {
 			return m_IsRepeat;
 		}
 		std::string ToString() const override final {
-			return std::string("KeyPressedEvent: ") + std::to_string(m_KeyCode) + " (repeat = " + std::to_string(m_IsRepeat) + ")";
+			return std::string("KeyPressedEvent: ") + std::to_string(static_cast<uint16_t>(m_KeyCode)) + " (repeat = " + std::to_string(m_IsRepeat) + ")";
 		}
 		EVENT_CLASS_TYPE_FINAL(KeyPressed)
 	private:
@@ -38,7 +38,7 @@ namespace Vectora {
 			: KeyEvent(keycode) {
 		}
 		std::string ToString() const override final {
-			return std::string("KeyReleasedEvent: ") + std::to_string(m_KeyCode);
+			return std::string("KeyReleasedEvent: ") + std::to_string(static_cast<uint16_t>(m_KeyCode));
 		}
 		EVENT_CLASS_TYPE_FINAL(KeyReleased)
 	
@@ -50,7 +50,7 @@ namespace Vectora {
 			: KeyEvent(keycode) {
 		}
 		std::string ToString() const override final{
-			return std::string("KeyTypedEvent: ") + std::to_string(m_KeyCode);
+			return std::string("KeyTypedEvent: ") + std::to_string(static_cast<uint16_t>(m_KeyCode));
 		}
 		EVENT_CLASS_TYPE_FINAL(KeyTyped)
 

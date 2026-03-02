@@ -13,37 +13,37 @@
 
 namespace Vectora {
 	ImGuiLayer* ImGuiLayer::s_ImGuiLayerInstance;
-	static ImGuiKey VEKeyToImGuiKey(int key)
+	static ImGuiKey VEKeyToImGuiKey(Key key)
 	{
 		switch (key)
 		{
-		case VE_KEY_TAB:           return ImGuiKey_Tab;
-		case VE_KEY_LEFT:          return ImGuiKey_LeftArrow;
-		case VE_KEY_RIGHT:         return ImGuiKey_RightArrow;
-		case VE_KEY_UP:            return ImGuiKey_UpArrow;
-		case VE_KEY_DOWN:          return ImGuiKey_DownArrow;
-		case VE_KEY_PAGE_UP:       return ImGuiKey_PageUp;
-		case VE_KEY_PAGE_DOWN:     return ImGuiKey_PageDown;
-		case VE_KEY_HOME:          return ImGuiKey_Home;
-		case VE_KEY_END:           return ImGuiKey_End;
-		case VE_KEY_INSERT:        return ImGuiKey_Insert;
-		case VE_KEY_DELETE:        return ImGuiKey_Delete;
-		case VE_KEY_BACKSPACE:     return ImGuiKey_Backspace;
-		case VE_KEY_SPACE:         return ImGuiKey_Space;
-		case VE_KEY_ENTER:         return ImGuiKey_Enter;
-		case VE_KEY_ESCAPE:        return ImGuiKey_Escape;
-		case VE_KEY_A:             return ImGuiKey_A;
-		case VE_KEY_C:             return ImGuiKey_C;
-		case VE_KEY_V:             return ImGuiKey_V;
-		case VE_KEY_X:             return ImGuiKey_X;
-		case VE_KEY_Y:             return ImGuiKey_Y;
-		case VE_KEY_Z:             return ImGuiKey_Z;
-		case VE_KEY_LEFT_CONTROL:  return ImGuiKey_LeftCtrl;
-		case VE_KEY_LEFT_SHIFT:    return ImGuiKey_LeftShift;
-		case VE_KEY_LEFT_ALT:      return ImGuiKey_LeftAlt;
-		case VE_KEY_RIGHT_CONTROL: return ImGuiKey_RightCtrl;
-		case VE_KEY_RIGHT_SHIFT:   return ImGuiKey_RightShift;
-		case VE_KEY_RIGHT_ALT:     return ImGuiKey_RightAlt;
+		case Key::VE_KEY_TAB:           return ImGuiKey_Tab;
+		case Key::VE_KEY_LEFT:          return ImGuiKey_LeftArrow;
+		case Key::VE_KEY_RIGHT:         return ImGuiKey_RightArrow;
+		case Key::VE_KEY_UP:            return ImGuiKey_UpArrow;
+		case Key::VE_KEY_DOWN:          return ImGuiKey_DownArrow;
+		case Key::VE_KEY_PAGE_UP:       return ImGuiKey_PageUp;
+		case Key::VE_KEY_PAGE_DOWN:     return ImGuiKey_PageDown;
+		case Key::VE_KEY_HOME:          return ImGuiKey_Home;
+		case Key::VE_KEY_END:           return ImGuiKey_End;
+		case Key::VE_KEY_INSERT:        return ImGuiKey_Insert;
+		case Key::VE_KEY_DELETE:        return ImGuiKey_Delete;
+		case Key::VE_KEY_BACKSPACE:     return ImGuiKey_Backspace;
+		case Key::VE_KEY_SPACE:         return ImGuiKey_Space;
+		case Key::VE_KEY_ENTER:         return ImGuiKey_Enter;
+		case Key::VE_KEY_ESCAPE:        return ImGuiKey_Escape;
+		case Key::VE_KEY_A:             return ImGuiKey_A;
+		case Key::VE_KEY_C:             return ImGuiKey_C;
+		case Key::VE_KEY_V:             return ImGuiKey_V;
+		case Key::VE_KEY_X:             return ImGuiKey_X;
+		case Key::VE_KEY_Y:             return ImGuiKey_Y;
+		case Key::VE_KEY_Z:             return ImGuiKey_Z;
+		case Key::VE_KEY_LEFT_CONTROL:  return ImGuiKey_LeftCtrl;
+		case Key::VE_KEY_LEFT_SHIFT:    return ImGuiKey_LeftShift;
+		case Key::VE_KEY_LEFT_ALT:      return ImGuiKey_LeftAlt;
+		case Key::VE_KEY_RIGHT_CONTROL: return ImGuiKey_RightCtrl;
+		case Key::VE_KEY_RIGHT_SHIFT:   return ImGuiKey_RightShift;
+		case Key::VE_KEY_RIGHT_ALT:     return ImGuiKey_RightAlt;
 			// ... add more as needed
 		default:                   return ImGuiKey_None;
 		}
@@ -61,9 +61,11 @@ namespace Vectora {
 
 	void ImGuiLayer::OnEvent(Event& e)
 	{
-		ImGuiIO& io = ImGui::GetIO();
-		e.Handled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
-		e.Handled |= e.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		if(m_BlockEvents){
+			ImGuiIO& io = ImGui::GetIO();
+			e.Handled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
+			e.Handled |= e.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		}
 	}
 
 	void ImGuiLayer::OnAttach()

@@ -15,22 +15,22 @@ namespace Vectora {
 	void OrthographicCameraController::OnUpdate(Timestep ts)
 	{
 		VE_PROFILE_FUNCTION();
-		if (Input::IsKeyPressed(VE_KEY_A))
+		if (Input::IsKeyPressed(Key::VE_KEY_A))
 		{
 			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
-		else if (Input::IsKeyPressed(VE_KEY_D))
+		else if (Input::IsKeyPressed(Key::VE_KEY_D))
 		{
 			m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 			m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
-		if (Input::IsKeyPressed(VE_KEY_S))
+		if (Input::IsKeyPressed(Key::VE_KEY_S))
 		{
 			m_CameraPosition.x -= -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 			m_CameraPosition.y -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
-		else if (Input::IsKeyPressed(VE_KEY_W))
+		else if (Input::IsKeyPressed(Key::VE_KEY_W))
 		{
 			m_CameraPosition.x += -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 			m_CameraPosition.y += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
@@ -38,9 +38,9 @@ namespace Vectora {
 
 		if(m_Rotation) 
 		{
-			if (Vectora::Input::IsKeyPressed(VE_KEY_Q))
+			if (Vectora::Input::IsKeyPressed(Key::VE_KEY_Q))
 				m_CameraRotation += m_CameraRotationSpeed * ts;
-			else if (Vectora::Input::IsKeyPressed(VE_KEY_E))
+			else if (Vectora::Input::IsKeyPressed(Key::VE_KEY_E))
 				m_CameraRotation -= m_CameraRotationSpeed * ts;
 
 			if (m_CameraRotation > 180.0f)
@@ -62,6 +62,12 @@ namespace Vectora {
 		dispatcher.Dispatch<MouseScrolledEvent>(VE_BIND_EVENT_FN(OrthographicCameraController::OnMouseScrolled));
 		dispatcher.Dispatch<WindowResizeEvent>(VE_BIND_EVENT_FN(OrthographicCameraController::OnWindowResized));
 	}
+	void OrthographicCameraController::OnResize(float width, float height)
+	{
+		VE_PROFILE_FUNCTION();
+		m_AspectRatio = width / height;
+		m_Camera.SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
+	}
 	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent& e)
 	{
 		VE_PROFILE_FUNCTION();
@@ -73,9 +79,8 @@ namespace Vectora {
 	bool OrthographicCameraController::OnWindowResized(WindowResizeEvent& e)
 	{
 		VE_PROFILE_FUNCTION();
-		VE_CORE_INFO("Aspect Ratio: {0} (W: {1}, H: {2})", m_AspectRatio, e.GetWidth(), e.GetHeight());
-		m_AspectRatio = (float)e.GetWidth() / (float)e.GetHeight();
-		m_Camera.SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
+	
+		OnResize((float)e.GetWidth(), (float)e.GetHeight());
 		return false;
 	}
 }

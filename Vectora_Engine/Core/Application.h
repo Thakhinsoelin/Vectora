@@ -18,7 +18,7 @@ namespace Vectora {
 	class VECTORA_API Application
 	{
 	public:
-		Application();
+		Application(const std::string& name = "Vectora Main App");
 		virtual ~Application();
 
 		void OnEvent(Event& e);
@@ -35,6 +35,8 @@ namespace Vectora {
 		void SetRunning(bool run) {
 			this->m_Running = run;
 		}
+
+		ImGuiLayer* GetImGuiLayer() { return m_ImguiLayer; }
 	private:
 		void Run();
 		Scope<Window> window;

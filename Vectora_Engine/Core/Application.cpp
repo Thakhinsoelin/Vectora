@@ -20,7 +20,7 @@ auto do_something() -> auto {
 namespace Vectora {
 	Application* Application::s_Instance = nullptr;
 	
-	Application::Application()
+	Application::Application(const std::string& name)
 	{
 		VE_PROFILE_FUNCTION();
 

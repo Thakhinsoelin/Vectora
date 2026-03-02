@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.28)
 project(Vectora LANGUAGES C CXX)
-set(VE_ENGINE_TARGET Vectora_Engine)
-set(VE_EDITOR_TARGET Vectora_Editor)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(CMAKE_CXX_STANDARD 20)
+set(VE_ENGINE_TARGET Vectora_Engine)
+set(VE_SANDBOX_TARGET Sandbox)
+set(VE_EDITOR_TARGET Vectora_Editor)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # I might need this later
@@ -76,6 +78,30 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(glfw glm spdlog imgui)
+get_property(glfwTargets
+    DIRECTORY ${glfw_BINARY_DIR}
+    PROPERTY BUILDSYSTEM_TARGETS
+)
+foreach(target
+    uninstall
+    update_mappings
+)
+    if(TARGET ${target})
+        set_target_properties(${target}
+            PROPERTIES FOLDER "Dependencies/"
+        )
+    endif()
+endforeach()
+
+#foreach(target ${glfwTargets})
+#    set_target_properties(${target}
+#        PROPERTIES FOLDER "Dependencies"
+#    )
+#endforeach()
+#foreach(target ${allTargets})
+#    set_target_properties(${target} PROPERTIES FOLDER "Dependencies/GLFW")
+#endforeach()
+
 add_library(imgui_static STATIC 
     ${imgui_SOURCE_DIR}/imgui.cpp
     ${imgui_SOURCE_DIR}/imgui_demo.cpp
@@ -101,6 +127,12 @@ target_compile_definitions(imgui_static PRIVATE GLFW_INCLUDE_NONE)
 # --- OpenGL ---
 find_package(OpenGL REQUIRED)
 
+set_target_properties(glm PROPERTIES FOLDER "Dependencies")
+set_target_properties(glfw PROPERTIES FOLDER "Dependencies")
+set_target_properties(spdlog PROPERTIES FOLDER "Dependencies")
+set_target_properties(imgui_static PROPERTIES FOLDER "Dependencies")
+
+
 file(GLOB_RECURSE ENGINE CONFIGURE_DEPENDS
     Vectora_Engine/*.cpp
     Vectora_Engine/*.c
@@ -114,6 +146,13 @@ file(GLOB_RECURSE EDITOR CONFIGURE_DEPENDS
     Vectora_Editor/*.c
     Vectora_Editor/*.h
     Vectora_Editor/*.hpp
+)
+
+file(GLOB_RECURSE SANDBOX CONFIGURE_DEPENDS
+    Sandbox/*.cpp
+    Sandbox/*.c
+    Sandbox/*.h
+    Sandbox/*.hpp
 )
 
 add_library(${VE_ENGINE_TARGET} STATIC ${ENGINE})
@@ -163,6 +202,20 @@ set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
 target_compile_definitions(${VE_EDITOR_TARGET} PRIVATE VE_BUILD_STATIC VE_PLATFORM_WINDOWS)
 target_link_libraries(${VE_EDITOR_TARGET} PUBLIC ${VE_ENGINE_TARGET})
 
+add_executable(${VE_SANDBOX_TARGET} ${SANDBOX})
+target_include_directories(${VE_SANDBOX_TARGET} PRIVATE
+    ${CMAKE_SOURCE_DIR}/Sandbox
+    ${CMAKE_SOURCE_DIR}/Vectora_Engine
+    ${CMAKE_SOURCE_DIR}/includes
+)
+
+set_target_properties(${VE_SANDBOX_TARGET} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${BASE_OUTPUT_DIR}"
+)
+
+target_compile_definitions(${VE_SANDBOX_TARGET} PRIVATE VE_BUILD_STATIC VE_PLATFORM_WINDOWS)
+target_link_libraries(${VE_SANDBOX_TARGET} PUBLIC ${VE_ENGINE_TARGET})
+
 #foreach(OUTPUTCONFIG Debug Release RelWithDebInfo MinSizeRel)
 #f   string(TOUPPER ${OUTPUTCONFIG} CONFIG_UPPER)
 #f   set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
@@ -182,6 +235,11 @@ set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
     "${CMAKE_BINARY_DIR}/bin/$<CONFIG>-${ENGINE_PLATFORM}"
 )
 
+set_target_properties(${VE_SANDBOX_TARGET} PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY
+    "${CMAKE_BINARY_DIR}/bin/$<CONFIG>-${ENGINE_PLATFORM}"
+)
+
 # to copy the entire shaders to the output path, i am not sure it is a good idea or not
 add_custom_target(copy_shaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -192,4 +250,7 @@ add_custom_target(copy_shaders ALL
             "${CMAKE_SOURCE_DIR}/Vectora_Editor/assets"
             "${BASE_OUTPUT_DIR}/assets"
 )
+
+set_target_properties(copy_shaders PROPERTIES FOLDER "Dependencies")
+
 add_dependencies(${VE_EDITOR_TARGET} copy_shaders) 
