@@ -24,3 +24,6 @@
 #include "Renderer/Texture.h"
 #include "Renderer/FrameBuffer.h"
 //----------------------------------------
+
+#include "Scene/Components.h"
+#include "Scene/Scene.hpp"

@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 
 namespace Vectora{
-
+	static const uint32_t s_MaxFramebufferSize = 8192;
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& spec)
 		: m_Specification(spec)
 	{
@@ -67,6 +67,12 @@ namespace Vectora{
 
 	void OpenGLFramebuffer::Resize(VE_UINT32 width, VE_UINT32 height)
 	{
+		if (width == 0 || height == 0 || width > s_MaxFramebufferSize || height > s_MaxFramebufferSize)
+		{
+			VE_CORE_WARN("Attempted to rezize framebuffer to {0}, {1}", width, height);
+			return;
+		}
+
 		m_Specification.Width = width;
 		m_Specification.Height = height;
 

@@ -36,6 +36,9 @@ namespace Vectora
 		std::vector<ProfileResult> m_ProfileResults;
 		glm::vec2 m_ViewportSize = { 0.f, 0.f };
 
+		Ref<Scene> m_ActiveScene;
+		entt::entity m_SquareEntity;
+
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 	};
 }

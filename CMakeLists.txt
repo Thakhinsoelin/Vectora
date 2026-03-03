@@ -160,6 +160,7 @@ add_dependencies(${VE_ENGINE_TARGET} imgui_static)
 # Include your own headers
 target_include_directories(${VE_ENGINE_TARGET} PUBLIC
     ${CMAKE_SOURCE_DIR}/Vectora_Engine
+    ${CMAKE_SOURCE_DIR}/includes/entt
     ${CMAKE_SOURCE_DIR}/includes
     ${imgui_SOURCE_DIR}
 )
@@ -192,6 +193,7 @@ target_precompile_headers(${VE_ENGINE_TARGET} PRIVATE
 add_executable(${VE_EDITOR_TARGET} ${EDITOR})
 target_include_directories(${VE_EDITOR_TARGET} PRIVATE
     ${CMAKE_SOURCE_DIR}/Vectora_Editor
+    ${CMAKE_SOURCE_DIR}/includes/entt
     ${CMAKE_SOURCE_DIR}/includes
 )
 
@@ -206,6 +208,7 @@ add_executable(${VE_SANDBOX_TARGET} ${SANDBOX})
 target_include_directories(${VE_SANDBOX_TARGET} PRIVATE
     ${CMAKE_SOURCE_DIR}/Sandbox
     ${CMAKE_SOURCE_DIR}/Vectora_Engine
+    ${CMAKE_SOURCE_DIR}/includes/entt
     ${CMAKE_SOURCE_DIR}/includes
 )
 
@@ -242,12 +245,16 @@ set_target_properties(${VE_SANDBOX_TARGET} PROPERTIES
 
 # to copy the entire shaders to the output path, i am not sure it is a good idea or not
 add_custom_target(copy_shaders ALL
+    # Ensure the destination directories exist first
+    #COMMAND ${CMAKE_COMMAND} -E make_directory "${BASE_OUTPUT_DIR}/shaders"
+    #COMMAND ${CMAKE_COMMAND} -E make_directory "${BASE_OUTPUT_DIR}/assets"
+
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/Vectora_Engine/shaders"
             "${BASE_OUTPUT_DIR}/shaders"
 
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_SOURCE_DIR}/Vectora_Editor/assets"
+            "${CMAKE_SOURCE_DIR}/Sandbox/assets"
             "${BASE_OUTPUT_DIR}/assets"
 )
 

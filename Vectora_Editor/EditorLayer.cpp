@@ -8,7 +8,7 @@
 
 namespace Vectora{
 	EditorLayer::EditorLayer()
-		: Layer("EditorLayer"), m_CameraController(600.0f / 600.0f)
+		: Layer("EditorLayer"), m_CameraController(1280.f / 720.0f)
 	{
 	}
 
@@ -21,6 +21,14 @@ namespace Vectora{
 		fbSpecs.Width = 1280;
 		fbSpecs.Height = 720;
 		m_FrameBuffer = Framebuffer::Create(fbSpecs);
+
+		m_ActiveScene = CreateRef<Scene>();
+
+		auto square = m_ActiveScene->CreateEntity();
+		m_ActiveScene->Reg().emplace<TransformComponent>(square);
+		m_ActiveScene->Reg().emplace<SpriteRendererComponent>(square, glm::vec4{0.f, 1.f, 0.f, 1.f});
+
+		m_SquareEntity = square;
 	}
 
 	void EditorLayer::OnDetach()
@@ -28,61 +36,84 @@ namespace Vectora{
 		VE_PROFILE_FUNCTION();
 	}
 
-	void EditorLayer::OnUpdate(Timestep ts)
-	{
-		fps = 1 / ts.GetSeconds();
+	//void EditorLayer::OnUpdate(Timestep ts)
+	//{
+	//	fps = 1 / ts.GetSeconds();
+	//	VE_PROFILE_FUNCTION();
+	//	// Resize
+	//	if (FramebufferSpecification spec = m_FrameBuffer->GetSpecification();
+	//		m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
+	//		(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
+	//	{
+	//		m_FrameBuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+	//		m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
+	//	}
+
+	//	// Update
+
+	//	if(m_ViewportFocused){
+	//		//VE_PROFILE_SCOPE("CameraController::OnUpdate");
+	//		m_CameraController.OnUpdate(ts);
+	//	}
+
+	//	// Render
+	//	Renderer2D::ResetStats();
+	//	{
+	//		VE_PROFILE_SCOPE("Renderer Prep");
+	//		m_FrameBuffer->Bind();
+	//		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+	//		RenderCommand::Clear();
+	//	}
+	//	{
+	//		static float rotation = 0.0f;
+	//		rotation += ts * 50.0f;
+
+	//		VE_PROFILE_SCOPE("Renderer Draw");
+	//		Renderer2D::BeginScene(m_CameraController.GetCamera());
+	//	
+	//		Renderer2D::DrawRotatedQuad({ 1.0f, 0.0f }, { 0.8f, 0.8f }, -45.f, { 0.8f, 0.2f, 0.3f, 1.0f });
+	//		Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
+	//		Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.2f, 0.3f, 0.8f, 1.0f });
+	//		//Renderer2D::DrawRotatedQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, glm::radians(80.f), m_CheckerboardTexture, 10.f, glm::vec4(1.f, .9f, .8f, 1.f));
+	//		Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 20.0f, 20.0f }, m_CheckerboardTexture, 10.0f);
+	//		Renderer2D::DrawRotatedQuad({ -2.f, 0.f, 0.0f }, { 1.0f, 1.0f }, rotation, m_CheckerboardTexture, 20.0f);
+	//		Renderer2D::EndScene();
+
+	//		Renderer2D::BeginScene(m_CameraController.GetCamera());
+	//		for (float y = -5.0f; y < 5.0f; y += 0.5f)
+	//		{
+	//			for (float x = -5.0f; x < 5.0f; x += 0.5f)
+	//			{
+	//				glm::vec4 color = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f };
+	//				Renderer2D::DrawQuad({ x, y }, { 0.45f, 0.45f }, color);
+	//			}
+	//		}
+	//		Renderer2D::EndScene();
+	//		m_FrameBuffer->Unbind();
+	//	}
+	//}
+
+	void EditorLayer::OnUpdate(Timestep ts) {
 		VE_PROFILE_FUNCTION();
-		// Resize
-		if (FramebufferSpecification spec = m_FrameBuffer->GetSpecification();
-			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
-			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
-		{
-			m_FrameBuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
-		}
 
 		// Update
-
-		if(m_ViewportFocused){
-			//VE_PROFILE_SCOPE("CameraController::OnUpdate");
+		if (m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
-		}
 
 		// Render
 		Renderer2D::ResetStats();
-		{
-			VE_PROFILE_SCOPE("Renderer Prep");
-			m_FrameBuffer->Bind();
-			RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-			RenderCommand::Clear();
-		}
-		{
-			static float rotation = 0.0f;
-			rotation += ts * 50.0f;
+		m_FrameBuffer->Bind();
+		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+		RenderCommand::Clear();
 
-			VE_PROFILE_SCOPE("Renderer Draw");
-			Renderer2D::BeginScene(m_CameraController.GetCamera());
-		
-			Renderer2D::DrawRotatedQuad({ 1.0f, 0.0f }, { 0.8f, 0.8f }, -45.f, { 0.8f, 0.2f, 0.3f, 1.0f });
-			Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
-			Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.2f, 0.3f, 0.8f, 1.0f });
-			//Renderer2D::DrawRotatedQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, glm::radians(80.f), m_CheckerboardTexture, 10.f, glm::vec4(1.f, .9f, .8f, 1.f));
-			Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 20.0f, 20.0f }, m_CheckerboardTexture, 10.0f);
-			Renderer2D::DrawRotatedQuad({ -2.f, 0.f, 0.0f }, { 1.0f, 1.0f }, rotation, m_CheckerboardTexture, 20.0f);
-			Renderer2D::EndScene();
+		Renderer2D::BeginScene(m_CameraController.GetCamera());
 
-			Renderer2D::BeginScene(m_CameraController.GetCamera());
-			for (float y = -5.0f; y < 5.0f; y += 0.5f)
-			{
-				for (float x = -5.0f; x < 5.0f; x += 0.5f)
-				{
-					glm::vec4 color = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f };
-					Renderer2D::DrawQuad({ x, y }, { 0.45f, 0.45f }, color);
-				}
-			}
-			Renderer2D::EndScene();
-			m_FrameBuffer->Unbind();
-		}
+		// Update scene
+		m_ActiveScene->OnUpdate(ts);
+
+		Renderer2D::EndScene();
+
+		m_FrameBuffer->Unbind();
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -158,7 +189,8 @@ namespace Vectora{
 			ImGui::Text("Quads: %d", stats.QuadCount);
 			ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 			ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-			ImGui::ColorEdit4("Square Color", glm::value_ptr(m_SquareColor));
+			auto& squareColor = m_ActiveScene->Reg().get<SpriteRendererComponent>(m_SquareEntity).Color;
+			ImGui::ColorEdit4("Square Color", glm::value_ptr(squareColor));
 			ImGui::End();
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0, 0 });
 			
