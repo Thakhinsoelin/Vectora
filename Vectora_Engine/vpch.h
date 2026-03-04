@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <unordered_map>
 #include <unordered_set>
+#include <tuple>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>

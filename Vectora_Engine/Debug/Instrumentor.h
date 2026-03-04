@@ -28,16 +28,9 @@ namespace Vectora {
 
 	class Instrumentor
 	{
-	private:
-		InstrumentationSession* m_CurrentSession;
-		std::ofstream m_OutputStream;
-		std::mutex m_Mutex;
-		int m_ProfileCount;
 	public:
-		Instrumentor()
-			: m_CurrentSession(nullptr)
-		{
-		}
+		Instrumentor(const Instrumentor&) = delete;
+		Instrumentor(Instrumentor&&) = delete;
 
 		void BeginSession(const std::string& name, const std::string& filepath = "results.json")
 		{
@@ -119,6 +112,20 @@ namespace Vectora {
 			static Instrumentor instance;
 			return instance;
 		}
+	private:
+		Instrumentor()
+			: m_CurrentSession(nullptr)
+		{
+		}
+
+		~Instrumentor()
+		{
+			EndSession();
+		}
+	private:
+		std::mutex m_Mutex;
+		InstrumentationSession* m_CurrentSession;
+		std::ofstream m_OutputStream;
 	};
 
 	namespace InstrumentorUtils {
@@ -186,8 +193,10 @@ namespace Vectora {
 #if VE_PROFILE
 #define VE_PROFILE_BEGIN_SESSION(name, filepath) ::Vectora::Instrumentor::Get().BeginSession(name, filepath)
 #define VE_PROFILE_END_SESSION() ::Vectora::Instrumentor::Get().EndSession()
-#define VE_PROFILE_SCOPE(name) constexpr auto fixedName = ::Hazel::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");\
-									::Hazel::InstrumentationTimer timer##__LINE__(fixedName.Data)
+#define VE_PROFILE_SCOPE_LINE2(name, line) constexpr auto fixedName##line = ::Vectora::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");\
+											   ::Vectora::InstrumentationTimer timer##line(fixedName##line.Data)
+#define VE_PROFILE_SCOPE_LINE(name, line) VE_PROFILE_SCOPE_LINE2(name, line)
+#define VE_PROFILE_SCOPE(name) VE_PROFILE_SCOPE_LINE(name, __LINE__)
 #define VE_PROFILE_FUNCTION() VE_PROFILE_SCOPE(__FUNCSIG__)
 #else
 #define VE_PROFILE_BEGIN_SESSION(name, filepath)

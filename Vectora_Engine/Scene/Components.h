@@ -1,9 +1,19 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "Core/Camera.h"
+#include "Scene/SceneCamera.h"
 
 namespace Vectora {
-
+	struct TagComponent 
+	{
+		std::string Tag;
+		TagComponent() = default;
+		TagComponent(const TagComponent&) = default;
+		TagComponent(const std::string& tag)
+			: Tag(tag) {
+		}
+	};
 	struct TransformComponent
 	{
 		glm::mat4 Transform{ 1.0f };
@@ -25,6 +35,15 @@ namespace Vectora {
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
 		SpriteRendererComponent(const glm::vec4& color)
 			: Color(color) {}
+	};
+
+	struct CameraComponent {
+		SceneCamera camera;
+		bool Primary = true; // TODO: Think about moving to Scene
+
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
+		bool FixedAspectRatio = false;
 	};
 
 }

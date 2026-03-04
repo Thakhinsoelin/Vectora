@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/Camera.h"
 #include "Renderer/OrthographiCamera.h"
 #include "Texture.h"
 
@@ -8,7 +9,9 @@ namespace Vectora {
 		static void Init();
 		static void ShutDown();
 
-		static void BeginScene(const OrthoGraphicCamera& camera);
+		static void BeginScene(const CameraC& camera, const glm::mat4& transform);
+		
+		static void BeginScene(const OrthoGraphicCamera& camera); // TODO: Remove
 		static void EndScene();
 
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);

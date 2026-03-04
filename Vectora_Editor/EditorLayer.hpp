@@ -32,12 +32,17 @@ namespace Vectora
 			const char* Name;
 			float Time;
 		};
-		float fps;
+		float fps = 0.f;
 		std::vector<ProfileResult> m_ProfileResults;
 		glm::vec2 m_ViewportSize = { 0.f, 0.f };
 
 		Ref<Scene> m_ActiveScene;
-		entt::entity m_SquareEntity;
+		Entity m_SquareEntity;
+
+		Entity m_CameraEntity;
+		Entity m_SecondCamera;
+
+		bool m_PrimaryCamera = true;
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 	};

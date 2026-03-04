@@ -15,7 +15,7 @@
 #endif
 #define BIT(x) (1 << x)
 
-#define VE_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+#define VE_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
 
 #ifdef VE_ENABLE_ASSERTS
 #define VE_ASSERT(x, ...) { if(!(x)) { VE_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }

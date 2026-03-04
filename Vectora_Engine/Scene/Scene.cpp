@@ -1,7 +1,7 @@
 #include "Scene.hpp"
 
 #include "vpch.h"
-
+#include "Entity.h"
 #include "Components.h"
 #include "Renderer/Renderer2D.h"
 
@@ -50,19 +50,79 @@ namespace Vectora {
 	{
 	}
 
-	entt::entity Scene::CreateEntity()
+	Entity Scene::CreateEntity(const std::string& name)
 	{
-		return m_Registry.create();
+		Entity entity = { m_Registry.create(), this };
+		entity.AddComponent<TransformComponent>();
+		auto& tag = entity.AddComponent<TagComponent>();
+		tag.Tag = name.empty() ? "Entity" : name;
+		return entity;
 	}
 
 	void Scene::OnUpdate(Timestep ts)
 	{
-		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-		for (auto entity : group)
+		CameraC* mainCamera = nullptr;
+		glm::mat4* cameraTransform = nullptr;
 		{
-			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+			auto group = m_Registry.view<TransformComponent, CameraComponent>();
+			// Use .each() with a lambda for a cleaner, more compatible loop
+			//group.each([&](auto entity, auto& transform, auto& camera)
+			//	{
+			//		if (camera.Primary)
+			//		{
+			//			mainCamera = &camera.Camera;
+			//			cameraTransform = &transform.Transform;
+			//			// Note: You cannot 'break' out of a lambda .each() easily. 
+			//			// If you need to break, use the loop below instead.
+			//		}
+			//	});
+			{
+				auto view = m_Registry.view<CameraComponent>(); // Only view cameras
+				for (auto entity : view)
+				{
+					auto& camera = view.get<CameraComponent>(entity);
+					if (camera.Primary)
+					{
+						// Only fetch the transform if we actually found the primary camera
+						auto& transform = m_Registry.get<TransformComponent>(entity);
+						mainCamera = &camera.camera;
+						cameraTransform = &transform.Transform;
+						break;
+					}
+				}
+			}
 
-			Renderer2D::DrawQuad(transform, sprite.Color);
+			if (mainCamera)
+			{
+				Renderer2D::BeginScene(mainCamera->GetProjection(), *cameraTransform);
+
+				auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+				for (auto entity : group)
+				{
+					auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+
+					Renderer2D::DrawQuad(transform, sprite.Color);
+				}
+
+				Renderer2D::EndScene();
+			}
+		}
+
+
+	}
+
+	void Scene::OnViewportResize(uint32_t width, uint32_t height)
+	{
+		m_ViewportWidth = width;
+		m_ViewportHeight = height;
+
+		// Resize our non-FixedAspectRatio cameras
+		auto view = m_Registry.view<CameraComponent>();
+		for (auto entity : view)
+		{
+			auto& cameraComponent = view.get<CameraComponent>(entity);
+			if (!cameraComponent.FixedAspectRatio)
+				cameraComponent.camera.SetViewportSize(width, height);
 		}
 
 
