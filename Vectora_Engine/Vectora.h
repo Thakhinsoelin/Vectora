@@ -27,3 +27,4 @@
 #include "Scene/Entity.h"	
 #include "Scene/Components.h"
 #include "Scene/Scene.hpp"
+#include "Scene/ScriptableEntity.h"

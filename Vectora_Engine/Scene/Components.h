@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "Core/Camera.h"
 #include "Scene/SceneCamera.h"
+#include "Scene/ScriptableEntity.h"
 
 namespace Vectora {
 	struct TagComponent 
@@ -44,6 +45,19 @@ namespace Vectora {
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
 		bool FixedAspectRatio = false;
+	};
+
+	struct NativeScriptComponent {
+		ScriptableEntity* Instance = nullptr;
+
+		ScriptableEntity* (*InstantiateScript)();
+		void (*DestroyScript)(NativeScriptComponent*);
+
+		template<typename T>
+		void Bind() {
+			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
+			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
+		}
 	};
 
 }
