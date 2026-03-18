@@ -10,7 +10,10 @@
 #include "Renderer/Buffer.h"
 #include "Renderer/VertexArray.h"
 #include "Renderer/OrthographiCamera.h"
+
+#ifdef SUPPORT_DISCORD
 #include "Core/DiscordManager.h"
+#endif
 
 #include <math.h>
 
@@ -50,8 +53,10 @@ namespace Vectora {
 		float m_LastFrameTime = 0.f;
 
 	private:
+#ifdef SUPPORT_DISCORD
 		Scope<DiscordManager> m_DiscordManager = nullptr;
-		
+#endif		
+
 		static Application* s_Instance;
 		friend int ::main(int argc, char** argv);
 	};

@@ -36,8 +36,10 @@ namespace Vectora {
 		m_ImguiLayer = new ImGuiLayer();
 		PushOverlay(m_ImguiLayer);
 
+#ifdef SUPPORT_DISCORD
 		m_DiscordManager = CreateScope<DiscordManager>();
 		m_DiscordManager->Init();
+#endif
 	}
 
 	Application::~Application()
@@ -54,9 +56,11 @@ namespace Vectora {
 			float time = (float)glfwGetTime();
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
-			m_DiscordManager->Update();
-			m_DiscordManager->UpdatePresence("Kozen is a nigger", "fuck u");
 
+#ifdef SUPPORT_DISCORD
+			m_DiscordManager->Update(timestep);
+			m_DiscordManager->UpdatePresence("Kozen is a nigger", "fuck u");
+#endif
 			if(!m_Minimized)
 			{
 				VE_PROFILE_SCOPE("layerstack onupdate");

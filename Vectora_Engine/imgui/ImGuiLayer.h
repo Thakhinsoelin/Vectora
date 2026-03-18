@@ -24,6 +24,8 @@ namespace Vectora {
 
 		void BlockEvents(bool block) { m_BlockEvents = block; }
 
+		void SetDarkThemeColors();
+
 		::ImGuiContext* GetContext() { return m_Context; }
 		static ImGuiLayer* GetImguiLayerInstance() { return s_ImGuiLayerInstance; }
 	private:

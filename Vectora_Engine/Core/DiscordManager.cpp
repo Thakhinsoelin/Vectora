@@ -19,18 +19,10 @@ namespace Vectora {
 			std::cout << "[" << EnumToString(severity) << "] " << message << std::endl;
 			}, discordpp::LoggingSeverity::Info);
 
-		s_Client->SetStatusChangedCallback([](discordpp::Client::Status status, discordpp::Client::Error error, int32_t errorDetail) {
-			if (status == discordpp::Client::Status::Ready) {
-				VE_CORE_INFO("Discord: Client is ready!");
-				s_IsReady = true;
+		s_IsReady = true;
 
-				// Set initial status once ready
-				UpdatePresence("Vectora Engine", "Idle");
-			}
-			else if (error != discordpp::Client::Error::None) {
-				VE_CORE_ERROR("Discord Error: {0}", (int)error);
-			}
-			});
+		// Wait a tiny bit (or just call it directly) to ensure the pipe is open
+		UpdatePresence("Vectora Engine", "Idle");
 
 		
 		//s_Client->Connect();
@@ -38,27 +30,43 @@ namespace Vectora {
 	void DiscordManager::ShutDown()
 	{
 	}
-	void DiscordManager::Update()
+	void DiscordManager::Update(float deltaTime)
 	{
 		discordpp::RunCallbacks();
+		// Increment timer
+		m_Timer += deltaTime;
+
+		// Only send to Discord if 15s have passed AND we actually have new data to send
+		if (m_Timer >= m_UpdateInterval)
+		{
+			if (m_NeedsUpdate && s_Client)
+			{
+				discordpp::Activity activity;
+				activity.SetType(discordpp::ActivityTypes::Playing);
+				activity.SetDetails(m_CachedDetails.c_str());
+				activity.SetState(m_CachedState.c_str());
+
+				s_Client->UpdateRichPresence(activity, [](const discordpp::ClientResult& result) {
+					if (result.Successful()) {
+						std::cout << "🎮 [Throttled] Rich Presence Updated.\n";
+					}
+					});
+
+				m_NeedsUpdate = false; // Reset the flag
+			}
+
+			m_Timer = 0.0f; // Reset timer regardless to keep the 15s cadence
+		}
 	}
 	void DiscordManager::UpdatePresence(const std::string& details, const std::string& state, bool isPlaying)
 	{
-		if (!s_IsReady || !s_Client) return;
-		// Configure rich presence details
-		discordpp::Activity activity;
-		activity.SetType(discordpp::ActivityTypes::Playing);
-		activity.SetState(state);
-		activity.SetDetails(details);
+		if (!s_Client) return;
+		// If the data is exactly the same as what's currently showing, ignore it
+		if (m_CachedDetails == details && m_CachedState == state) return;
 
-		s_Client->UpdateRichPresence(
-			activity, [](const discordpp::ClientResult& result) {
-				if (result.Successful()) {
-					std::cout << "🎮 Rich Presence updated successfully!\n";
-				}
-				else {
-					std::cerr << "❌ Rich Presence update failed";
-				}
-			});
+		// Store the new data to be sent on the next "tick"
+		m_CachedDetails = details;
+		m_CachedState = state;
+		m_NeedsUpdate = true;
 	}
 }

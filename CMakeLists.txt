@@ -27,7 +27,7 @@ endif()
 
 # I might need this later
 # This ensures /MD for Release and /MDd for Debug
-# set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL") 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>") 
 if (WIN32)
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(ENGINE_PLATFORM "Win64")

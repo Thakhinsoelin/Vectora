@@ -9,8 +9,8 @@ namespace Vectora {
 		int height;
 		const char* title;
 		WindowProps(const char* title = "Vectora Engine",
-			VE_UINT width = 1280,
-			VE_UINT height = 720)
+			VE_UINT width = 1600,
+			VE_UINT height = 900)
 			: title(title), width(width), height(height) {
 		}
 	};

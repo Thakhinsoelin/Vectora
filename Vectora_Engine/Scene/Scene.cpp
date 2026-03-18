@@ -62,17 +62,7 @@ namespace Vectora {
 		glm::mat4 cameraTransform;
 		{
 			auto group = m_Registry.view<TransformComponent, CameraComponent>();
-			// Use .each() with a lambda for a cleaner, more compatible loop
-			//group.each([&](auto entity, auto& transform, auto& camera)
-			//	{
-			//		if (camera.Primary)
-			//		{
-			//			mainCamera = &camera.Camera;
-			//			cameraTransform = &transform.Transform;
-			//			// Note: You cannot 'break' out of a lambda .each() easily. 
-			//			// If you need to break, use the loop below instead.
-			//		}
-			//	});
+			
 			{
 				auto view = m_Registry.view<CameraComponent>(); // Only view cameras
 				for (auto entity : view)
@@ -80,10 +70,13 @@ namespace Vectora {
 					auto& camera = view.get<CameraComponent>(entity);
 					if (camera.Primary)
 					{
+						if(m_Registry.all_of<TransformComponent>(entity))
 						// Only fetch the transform if we actually found the primary camera
-						auto& transform = m_Registry.get<TransformComponent>(entity);
-						mainCamera = &camera.camera;
-						cameraTransform = transform.GetTransform();
+						{
+							auto& transform = m_Registry.get<TransformComponent>(entity);
+							mainCamera = &camera.camera;
+							cameraTransform = transform.GetTransform();
+						}
 						break;
 					}
 				}
@@ -94,12 +87,11 @@ namespace Vectora {
 				Renderer2D::BeginScene(*mainCamera, cameraTransform);
 
 				auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-				for (auto entity : group)
-				{
-					auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-
+				auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
+				// The 'each' method is the preferred modern EnTT way
+				view.each([](auto entity, auto& transform, auto& sprite) {
 					Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
-				}
+				});
 
 				Renderer2D::EndScene();
 			}
