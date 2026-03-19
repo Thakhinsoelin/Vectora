@@ -23,7 +23,6 @@
 
 #include "Core/Log.h"
 
-#ifdef V_PLATFORM_WINDOWS
+#ifdef VE_PLATFORM_WINDOWS
 #include <Windows.h>
-
 #endif

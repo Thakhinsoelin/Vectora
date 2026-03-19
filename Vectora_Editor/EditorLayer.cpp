@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Scene/SceneSerializer.h"
+#include "Utils/PlatformUtils.h"
 
 namespace Vectora {
 
@@ -180,16 +181,18 @@ namespace Vectora {
 				// Disabling fullscreen would allow the window to be moved to the front of other windows, 
 				// which we can't undo at the moment without finer window depth/z control.
 				//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
-				if (ImGui::MenuItem("Serialize"))
+				if (ImGui::MenuItem("New", "Ctrl+N"))
 				{
-					SceneSerializer serializer(m_ActiveScene);
-					serializer.Serialize("assets/scenes/Example.Vectora");
+					NewScene();
+				}
+				if (ImGui::MenuItem("Open...","Ctrl+O"))
+				{
+					OpenScene();
 				}
 
-				if (ImGui::MenuItem("Deserialize"))
+				if (ImGui::MenuItem("Save As...","Ctrl+Shift+S"))
 				{
-					SceneSerializer serializer(m_ActiveScene);
-					serializer.Deserialize("assets/scenes/Example.Vectora");
+					SaveSceneAs();
 				}
 
 				if (ImGui::MenuItem("Exit")) Application::Get().SetRunning(false);
@@ -232,6 +235,71 @@ namespace Vectora {
 	void EditorLayer::OnEvent(Event& e)
 	{
 		m_CameraController.OnEvent(e);
+
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<KeyPressedEvent>(VE_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+	}
+
+	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
+	{
+		bool control = Input::IsKeyPressed(Key::VE_KEY_LEFT_CONTROL) || Input::IsKeyPressed(Key::VE_KEY_RIGHT_CONTROL);
+		bool shift = Input::IsKeyPressed(Key::VE_KEY_LEFT_SHIFT) || Input::IsKeyPressed(Key::VE_KEY_RIGHT_SHIFT);
+		switch (e.GetKeyCode())
+		{
+			case Key::VE_KEY_N:
+			{
+				if (control)
+					NewScene();
+
+				break;
+			}
+			case Key::VE_KEY_O:
+			{
+				if (control)
+					OpenScene();
+
+				break;
+			}
+			case Key::VE_KEY_S:
+			{
+				if (control && shift)
+					SaveSceneAs();
+
+				break;
+			}
+		}
+		return false;
+	}
+
+	void EditorLayer::NewScene()
+	{
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void EditorLayer::OpenScene()
+	{
+		std::optional<std::string> filepath = FileDialogs::OpenFile("Vectora Scene (*.vectora)\0*.vectora\0");
+		if (filepath.has_value())
+		{
+			m_ActiveScene = CreateRef<Scene>();
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Deserialize(filepath.value());
+		}
+	}
+
+	void EditorLayer::SaveSceneAs()
+	{
+		std::optional<std::string> filepath = FileDialogs::SaveFile("Vectora Scene (*.vectora)\0*.vectora\0");
+		if (filepath.has_value())
+		{
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Serialize(filepath.value());
+		}
 	}
 
 }

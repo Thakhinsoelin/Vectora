@@ -15,6 +15,7 @@ namespace Vectora {
 	void SceneHirearchyPanel::SetContext(const Ref<Scene>& context)
 	{
 		m_Context = context;
+		m_SelectionContext = {};
 	}
 
 	void SceneHirearchyPanel::OnImGuiRender()
