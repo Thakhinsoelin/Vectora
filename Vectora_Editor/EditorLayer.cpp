@@ -1,11 +1,13 @@
 #include "EditorLayer.hpp"
 #include <imgui.h>
+#include <ImGuizmo.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Scene/SceneSerializer.h"
 #include "Utils/PlatformUtils.h"
+#include "Math/Math.h"
 
 namespace Vectora {
 
@@ -18,7 +20,7 @@ namespace Vectora {
 	{
 		VE_PROFILE_FUNCTION();
 
-		m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
+		//m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
 
 		FramebufferSpecification fbSpec;
 		fbSpec.Width = 1280;
@@ -226,6 +228,86 @@ namespace Vectora {
 
 		uint64_t textureID = m_FrameBuffer->GetColorAttachmentRendererID();
 		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+		// Gizmos
+		auto selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if (selectedEntity && m_GizmoType != -1)
+		{
+			std::cout << "gizmo type: " << m_GizmoType << std::endl;
+			ImGuizmo::SetID(0);
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
+			VE_CORE_INFO("Drawing Gizmo for entity: {0}", selectedEntity.GetComponent<TagComponent>().Tag);
+			float windowWidth = (float)ImGui::GetWindowWidth();
+			float windowHeight = (float)ImGui::GetWindowHeight();
+			ImVec2 windowPos = ImGui::GetWindowPos();
+			ImVec2 minBound = ImGui::GetWindowContentRegionMin(); // Accounts for title bar
+			ImGuizmo::SetRect(windowPos.x + minBound.x, windowPos.y + minBound.y, m_ViewportSize.x, m_ViewportSize.y);
+
+			// Camera
+			auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+			{
+
+				const auto& camera = cameraEntity.GetComponent<CameraComponent>().camera;
+				
+				//auto& ct = cameraEntity.GetComponent<TransformComponent>();
+				//// Force the camera to look at the origin by rotating it 180 degrees
+				//ct.Rotation.y = glm::radians(180.0f);
+				
+				const glm::mat4& cameraProjection = camera.GetProjection();
+				glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+				// Flip the Z-axis of the view matrix (Column 2 in 0-indexed GLM)
+				cameraView[2][0] = -cameraView[2][0];
+				cameraView[2][1] = -cameraView[2][1];
+				cameraView[2][2] = -cameraView[2][2];
+				cameraView[2][3] = -cameraView[2][3];
+
+				auto temp = cameraEntity.GetComponent<TransformComponent>().GetTransform();
+
+				auto& cameraTransform = cameraEntity.GetComponent<TransformComponent>();
+				//cameraTransform.Rotation.y = glm::radians(180.0f); // Face the positive Z direction
+				//cameraTransform.Translation.z = 10.0f;
+				// Entity transform
+				auto& tc = selectedEntity.GetComponent<TransformComponent>();
+				glm::mat4 transform = tc.GetTransform();
+				VE_CORE_TRACE("Camera Pos: {0}, {1}, {2}", cameraTransform.Translation.x, cameraTransform.Translation.y, cameraTransform.Translation.z);
+				VE_CORE_TRACE("Entity Pos: {0}, {1}, {2}", tc.Translation.x, tc.Translation.y, tc.Translation.z);
+
+				// Snapping
+				bool snap = Input::IsKeyPressed(Key::VE_KEY_LEFT_CONTROL);
+				float snapValue = 0.5f; // Snap to 0.5m for translation/scale
+				// Snap to 45 degrees for rotation
+				if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+					snapValue = 45.0f;
+
+				float snapValues[3] = { snapValue, snapValue, snapValue };
+				// Matrix A: The one that works
+				glm::mat4 workingView = glm::lookAt(glm::vec3(0, 0.2, -10), glm::vec3(0, 0, 0.35), glm::vec3(0, 1, 0));
+
+				// Matrix B: The one that fails
+				glm::mat4 failingView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+
+				// Log the 4th row (Translation) of both
+				VE_CORE_TRACE("Working View Z-Trans: {0}", workingView[3][2]);
+				VE_CORE_TRACE("Failing View Z-Trans: {0}", failingView[3][2]);
+
+				ImGuizmo::Manipulate(glm::value_ptr(temp), glm::value_ptr(cameraProjection),
+					(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
+					nullptr, snap ? snapValues : nullptr);
+
+				if (ImGuizmo::IsUsing())
+				{
+					glm::vec3 translation, rotation, scale;
+					Math::DecomposeTransform(transform, translation, rotation, scale);
+
+					glm::vec3 deltaRotation = rotation - tc.Rotation;
+					tc.Translation = translation;
+					tc.Rotation += deltaRotation;
+					tc.Scale = scale;
+				}
+			}
+		}
+
 		ImGui::End();
 		ImGui::PopStyleVar();
 
@@ -267,6 +349,20 @@ namespace Vectora {
 
 				break;
 			}
+
+			// Gizmos
+			case Key::VE_KEY_Q:
+				m_GizmoType = -1;
+				break;
+			case Key::VE_KEY_W:
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+				break;
+			case Key::VE_KEY_E:
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+				break;
+			case Key::VE_KEY_R:
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+				break;
 		}
 		return false;
 	}
@@ -301,5 +397,5 @@ namespace Vectora {
 			serializer.Serialize(filepath.value());
 		}
 	}
-
+	
 }

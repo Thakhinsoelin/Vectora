@@ -3,8 +3,10 @@
 #include "Debug/Instrumentor.h"
 #include "Core/Application.h"
 #include "Core/KeyCodes.h"
+#include "Math/Math.h"
 
 #include <imgui.h>
+#include <ImGuizmo.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_glfw.h>
 #include <GLFW/glfw3.h>
@@ -119,6 +121,7 @@ namespace Vectora {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 
 
 	}

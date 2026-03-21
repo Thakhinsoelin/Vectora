@@ -50,6 +50,8 @@ namespace Vectora
 		Entity m_CameraEntity;
 		Entity m_SecondCamera;
 
+		int m_GizmoType = -1;
+
 		bool m_PrimaryCamera = true;
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;

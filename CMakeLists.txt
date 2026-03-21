@@ -175,6 +175,7 @@ add_library(${VE_ENGINE_TARGET} STATIC ${ENGINE})
 add_dependencies(${VE_ENGINE_TARGET} imgui_static yaml-cpp)
 # Include your own headers
 target_include_directories(${VE_ENGINE_TARGET} PUBLIC
+    ${imguizmo_SOURCE_DIR}
     ${DISCORD_SDK_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/Vectora_Engine
     ${CMAKE_SOURCE_DIR}/includes/entt
@@ -182,9 +183,13 @@ target_include_directories(${VE_ENGINE_TARGET} PUBLIC
     ${imgui_SOURCE_DIR}
 )
 
-target_compile_definitions(${VE_ENGINE_TARGET} PRIVATE IMGUI_DEFINE_MATH_OPERATORS VE_BUILD_STATIC VE_PLATFORM_WINDOWS GLFW_INCLUDE_NONE)
-target_compile_definitions(${VE_ENGINE_TARGET} PRIVATE "T(x)=x") 
-target_compile_definitions(${VE_ENGINE_TARGET} PUBLIC IMGUI_DEFINE_MATH_OPERATORS)
+target_compile_definitions(${VE_ENGINE_TARGET} PRIVATE 
+    IMGUI_DEFINE_MATH_OPERATORS 
+    VE_BUILD_STATIC 
+    VE_PLATFORM_WINDOWS 
+    GLFW_INCLUDE_NONE
+    NOMINMAX # fuck you microsoft
+)
 target_compile_definitions(${VE_ENGINE_TARGET}
     PRIVATE
         $<$<CONFIG:Debug>:VE_ENABLE_ASSERTS>
@@ -217,6 +222,7 @@ target_precompile_headers(${VE_ENGINE_TARGET} PRIVATE
 
 add_executable(${VE_EDITOR_TARGET} ${EDITOR})
 target_include_directories(${VE_EDITOR_TARGET} PRIVATE
+    ${imguizmo_SOURCE_DIR}
     ${DISCORD_SDK_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/Vectora_Editor
     ${CMAKE_SOURCE_DIR}/includes/entt
@@ -232,6 +238,7 @@ target_link_libraries(${VE_EDITOR_TARGET} PUBLIC ${VE_ENGINE_TARGET} ${DISCORD_L
 
 add_executable(${VE_SANDBOX_TARGET} ${SANDBOX})
 target_include_directories(${VE_SANDBOX_TARGET} PRIVATE
+    ${imguizmo_SOURCE_DIR}
     ${DISCORD_SDK_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/Sandbox
     ${CMAKE_SOURCE_DIR}/Vectora_Engine
