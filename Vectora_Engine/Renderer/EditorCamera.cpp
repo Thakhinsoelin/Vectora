@@ -60,11 +60,11 @@ namespace Vectora {
 
 	void EditorCamera::OnUpdate(Timestep ts)
 	{
+		const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
+		glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
+		m_InitialMousePosition = mouse;
 		if (Input::IsKeyPressed(Key::VE_KEY_LEFT_ALT))
 		{
-			const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
-			glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
-			m_InitialMousePosition = mouse;
 
 			if (Input::IsMouseButtonPressed(Key::VE_MOUSE_BUTTON_MIDDLE) )
 				MousePan(delta);
@@ -74,16 +74,9 @@ namespace Vectora {
 				MouseZoom(delta.y);
 		}
 
-		if (Input::IsKeyPressed(Key::VE_KEY_LEFT_SHIFT))
+		if (Input::IsKeyPressed(Key::VE_KEY_LEFT_SHIFT) && Input::IsMouseButtonPressed(Key::VE_MOUSE_BUTTON_LEFT))
 		{
-			const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
-			glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
-			m_InitialMousePosition = mouse;
-			if (Input::IsKeyPressed(Key::VE_KEY_LEFT_SHIFT))
-			{
-				MousePan(delta);
-			}
-
+			MousePan(delta);
 		}
 
 		UpdateView();
