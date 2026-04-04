@@ -30,6 +30,12 @@ namespace Vectora
 		void OpenScene(const std::filesystem::path& path);
 		void SaveSceneAs();
 
+		void OnScenePlay();
+		void OnSceneStop();
+
+		// UI Panels
+		void UI_Toolbar();
+
 	private:
 		OrthographicCameraController m_CameraController;
 
@@ -38,6 +44,9 @@ namespace Vectora
 		Ref<Shader> m_FlatColorShader;
 		Ref<Texture2D> m_CheckerboardTexture;
 		Ref<Framebuffer> m_FrameBuffer;
+
+		Ref<Texture2D> m_IconPlay;
+		Ref<Texture2D> m_IconStop;
 
 		glm::vec4 m_SquareColor = { 0.2f, 0.3f, 0.8f, 1.0f };
 
@@ -67,5 +76,10 @@ namespace Vectora
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		SceneHirearchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
+
+		enum class SceneState {
+			Edit = 0, Play = 1
+		};
+		SceneState m_SceneState = SceneState::Edit;
 	};
 }
