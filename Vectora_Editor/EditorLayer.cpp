@@ -445,6 +445,13 @@ namespace Vectora {
 		}
 
 		Ref<Scene> newScene = CreateRef<Scene>();
+
+		// FIX 1: Set the size BEFORE deserializing
+		// If m_ViewportSize is still 0, default to something like 1600x900 so GLM doesn't crash
+		uint32_t width = m_ViewportSize.x > 0 ? (uint32_t)m_ViewportSize.x : 1280;
+		uint32_t height = m_ViewportSize.y > 0 ? (uint32_t)m_ViewportSize.y : 720;
+		newScene->OnViewportResize(width, height);
+
 		SceneSerializer serializer(newScene);
 		if (serializer.Deserialize(path.string()))
 		{
@@ -468,10 +475,12 @@ namespace Vectora {
 	void EditorLayer::OnScenePlay()
 	{
 		m_SceneState = SceneState::Play;
+		m_ActiveScene->OnRuntimeStart();
 	}
 
 	void EditorLayer::OnSceneStop() {
 		m_SceneState = SceneState::Edit;
+		m_ActiveScene->OnRuntimeStop();
 	}
 
 	void EditorLayer::UI_Toolbar()
