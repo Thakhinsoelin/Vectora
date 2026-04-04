@@ -77,7 +77,7 @@ namespace Vectora {
 						{
 							auto& transform = m_Registry.get<TransformComponent>(entity);
 							mainCamera = &camera.camera;
-							cameraTransform = transform.GetTransform();
+							cameraTransform = glm::inverse(transform.GetTransform());
 						}
 						break;
 					}
