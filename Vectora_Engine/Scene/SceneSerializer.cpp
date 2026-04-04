@@ -138,13 +138,6 @@ namespace Vectora {
 			}
 		}
 
-		/*m_Scene->m_Registry.each([&](auto entityID)
-			{
-				Entity entity = { entityID, m_Scene.get() };
-				if (!entity)
-					return;
-				SerializeEntity(out, entity);
-			});*/
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
 		std::ofstream fout(filepath);
@@ -157,12 +150,15 @@ namespace Vectora {
 	}
 	bool SceneSerializer::Deserialize(const std::string& filepath)
 	{
-		std::ifstream stream(filepath);
-		if (!stream.is_open())
-			VE_CORE_ERROR("Could not open file '{0}'", filepath);
-		std::stringstream strStream;
-		strStream << stream.rdbuf();
-		YAML::Node data = YAML::Load(strStream.str());
+		YAML::Node data;
+		try
+		{
+			data = YAML::LoadFile(filepath);
+		}
+		catch (const std::exception&)
+		{
+			return false;
+		}
 		if (!data["Scene"])
 			return false;
 		std::string sceneName = data["Scene"].as<std::string>();

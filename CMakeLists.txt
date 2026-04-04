@@ -25,9 +25,11 @@ else() # Linux
     set(DISCORD_SHARED_LIB "${DISCORD_SDK_LIB_DIR}/libdiscord_partner_sdk.so")
 endif()
 
-# I might need this later
+
 # This ensures /MD for Release and /MDd for Debug
+# I don't know how to make cmake link statically for other platforms, but for windows visual studio msvc, this is how you do it.
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>") 
+
 if (WIN32)
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(ENGINE_PLATFORM "Win64")
@@ -91,11 +93,20 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
+FetchContent_Declare(
+  box2d
+  GIT_REPOSITORY https://github.com/erincatto/box2d.git
+  GIT_TAG        v3.1.1 # Latest one as i am writing
+)
+
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(glfw glm spdlog imgui yaml-cpp ImGuizmo)
+set(BOX2D_BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
+set(BOX2D_BUILD_TESTBED OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(glfw glm spdlog imgui yaml-cpp ImGuizmo box2d)
 get_property(glfwTargets
     DIRECTORY ${glfw_BINARY_DIR}
     PROPERTY BUILDSYSTEM_TARGETS
@@ -143,6 +154,7 @@ set_target_properties(yaml-cpp PROPERTIES FOLDER "Dependencies")
 set_target_properties(yaml-cpp-parse PROPERTIES FOLDER "Dependencies")
 set_target_properties(yaml-cpp-read PROPERTIES FOLDER "Dependencies")
 set_target_properties(yaml-cpp-sandbox PROPERTIES FOLDER "Dependencies")
+set_target_properties(box2d PROPERTIES FOLDER "Dependencies")
 
 
 file(GLOB_RECURSE ENGINE CONFIGURE_DEPENDS
@@ -172,7 +184,7 @@ file(GLOB_RECURSE SANDBOX CONFIGURE_DEPENDS
 )
 
 add_library(${VE_ENGINE_TARGET} STATIC ${ENGINE})
-add_dependencies(${VE_ENGINE_TARGET} imgui_static yaml-cpp)
+add_dependencies(${VE_ENGINE_TARGET} imgui_static yaml-cpp box2d)
 # Include your own headers
 target_include_directories(${VE_ENGINE_TARGET} PUBLIC
     ${imguizmo_SOURCE_DIR}
@@ -210,6 +222,7 @@ target_link_libraries(${VE_ENGINE_TARGET} PUBLIC
     glm::glm
     spdlog::spdlog
     OpenGL::GL
+    box2d
 ) # // BREAKPOINT
 
 target_include_directories(${VE_ENGINE_TARGET} SYSTEM PRIVATE
