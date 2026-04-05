@@ -2,6 +2,8 @@
 #include <entt.hpp>
 
 #include "Scene.hpp"
+#include "Core/UUID.h"
+#include "Components.h"
 
 namespace Vectora
 {
@@ -45,7 +47,7 @@ namespace Vectora
 		operator bool() const { return m_EntityHandle != entt::null; }
 
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
-
+		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
 		bool operator==(const Entity& other) const
 		{
 			return m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene;

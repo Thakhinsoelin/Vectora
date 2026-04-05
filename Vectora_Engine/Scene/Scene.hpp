@@ -2,11 +2,12 @@
 #include <optional>
 
 #include "Core/Timestep.h"
+#include "Core/UUID.h"
 #include "Renderer/EditorCamera.h"
 
-#include <entt.hpp>
 
-class b2World;
+#include <entt.hpp>
+#include <box2d/id.h>
 
 namespace Vectora {
 	class Entity;
@@ -18,6 +19,7 @@ namespace Vectora {
 		~Scene();
 
 		Entity CreateEntity(const std::string& name = std::string());
+		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
 		void DestroyEntity(Entity entity);
 
 		void OnRuntimeStart();
@@ -37,7 +39,7 @@ namespace Vectora {
 		entt::registry m_Registry;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
-		b2World* m_PhysicsWorld = nullptr;
+		b2WorldId m_PhysicsWorld;
 
 		friend class Entity;
 		friend class SceneSerializer;

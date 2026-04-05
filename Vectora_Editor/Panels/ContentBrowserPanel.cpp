@@ -4,7 +4,7 @@
 
 namespace Vectora {
 	// Once we have projects, change this
-	extern const std::filesystem::path g_AssetPath = "../../../Vectora_Editor";
+	extern const std::filesystem::path g_AssetPath = "./";
 
 	ContentBrowserPanel::ContentBrowserPanel()
 		: m_CurrentDirectory(g_AssetPath)
