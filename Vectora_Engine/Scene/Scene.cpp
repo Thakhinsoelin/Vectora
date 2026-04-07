@@ -4,16 +4,29 @@
 #include "Entity.h"
 #include "Components.h"
 #include "Renderer/Renderer2D.h"
-
+#include "Scene/ScriptableEntity.h"
 
 #include <box2d/box2d.h>
 #include <box2d/base.h>
 #include <box2d/collision.h>
 #include <box2d/types.h>
+#include <box2d/id.h>
 
 #include <glm/glm.hpp>
 
 namespace Vectora {
+	static b2BodyType Rigidbody2DTypeToBox2DBody(Rigidbody2DComponent::BodyType bodyType)
+	{
+		switch (bodyType)
+		{
+		case Rigidbody2DComponent::BodyType::Static:    return b2_staticBody;
+		case Rigidbody2DComponent::BodyType::Dynamic:   return b2_dynamicBody;
+		case Rigidbody2DComponent::BodyType::Kinematic: return b2_kinematicBody;
+		}
+
+		VE_CORE_ASSERT(false, "Unknown body type");
+		return b2_staticBody;
+	}
 
 	static void DoMath(const glm::mat4& transform)
 	{
@@ -33,9 +46,73 @@ namespace Vectora {
 	{
 	}
 
+	template<typename Component>
+	static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap, Scene* dstScene)
+	{
+		auto view = src.view<Component>();
+		for (auto e : view)
+		{
+			UUID uuid = src.get<IDComponent>(e).ID;
+			VE_CORE_ASSERT(enttMap.find(uuid) != enttMap.end());
+			entt::entity dstEnttID = enttMap.at(uuid);
+
+			auto& component = src.get<Component>(e);
+			Entity dstEntity = { dstEnttID, dstScene };
+			dstEntity.AddOrReplaceComponent<Component>(component);
+		}
+	}
+
+	template<typename Component>
+	static void CopyComponentIfExists(Entity dst, Entity src)
+	{
+		if (src.HasComponent<Component>())
+			dst.AddOrReplaceComponent<Component>(src.GetComponent<Component>());
+	}
+
+	Ref<Scene> Scene::Copy(Ref<Scene> other)
+	{
+		Ref<Scene> newScene = CreateRef<Scene>();
+
+		newScene->m_ViewportWidth = other->m_ViewportWidth > 0 ? (uint32_t)other->m_ViewportWidth : 1280;
+		newScene->m_ViewportHeight = other->m_ViewportHeight > 0 ? (uint32_t)other->m_ViewportHeight : 720;
+
+		//newScene->OnViewportResize(newScene->m_ViewportWidth, newScene->m_ViewportHeight);
+
+		auto& srcSceneRegistry = other->m_Registry;
+		auto& dstSceneRegistry = newScene->m_Registry;
+		std::unordered_map<UUID, entt::entity> enttMap;
+
+		// Create entities in new scene
+		auto idView = srcSceneRegistry.view<IDComponent>();
+		for (auto e : idView)
+		{
+			UUID uuid = srcSceneRegistry.get<IDComponent>(e).ID;
+			const auto& name = srcSceneRegistry.get<TagComponent>(e).Tag;
+			Entity newEntity = newScene->CreateEntityWithUUID(uuid, name);
+			enttMap[uuid] = (entt::entity)newEntity;
+		}
+
+		// Copy components (except IDComponent and TagComponent)
+		CopyComponent<CameraComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+		CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+		CopyComponent<SpriteRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+		CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+		CopyComponent<Rigidbody2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+		CopyComponent<BoxCollider2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+
+		newScene->OnViewportResize(newScene->m_ViewportWidth, newScene->m_ViewportHeight);
+		return newScene;
+	}
+
 	Entity Scene::CreateEntity(const std::string& name)
 	{
+		return CreateEntityWithUUID(UUID(), name);
+	}
+
+	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
+	{
 		Entity entity = { m_Registry.create(), this };
+		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<TransformComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
@@ -49,7 +126,11 @@ namespace Vectora {
 
 	void Scene::OnRuntimeStart()
 	{
-		m_PhysicsWorld = new b2World({ 0.0f, -9.8f });
+		b2Vec2 gravity = { 0.f, -9.8f };
+		b2WorldDef worldDef = b2DefaultWorldDef();
+		worldDef.gravity = gravity;
+		m_PhysicsWorld = b2CreateWorld(&worldDef);
+		
 
 		auto view = m_Registry.view<Rigidbody2DComponent>();
 		for (auto e : view)
@@ -58,37 +139,49 @@ namespace Vectora {
 			auto& transform = entity.GetComponent<TransformComponent>();
 			auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
-			b2BodyDef bodyDef;
+			b2BodyDef bodyDef = b2DefaultBodyDef();
 			bodyDef.type = Rigidbody2DTypeToBox2DBody(rb2d.Type);
-			bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
-			bodyDef.angle = transform.Rotation.z;
+			bodyDef.position = { transform.Translation.x, transform.Translation.y };
+			bodyDef.rotation = b2MakeRot(transform.Rotation.z);
+			//bodyDef.angle = transform.Rotation.z;
 
-			b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
-			body->SetFixedRotation(rb2d.FixedRotation);
+			b2BodyId body = b2CreateBody(m_PhysicsWorld, &bodyDef);
+			b2Body_SetFixedRotation(body, rb2d.FixedRotation);
 			rb2d.RuntimeBody = body;
 
 			if (entity.HasComponent<BoxCollider2DComponent>())
 			{
 				auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
 
-				b2PolygonShape boxShape;
-				boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
+				// 1. Create the Shape Definition (Replaces b2FixtureDef)
+				b2ShapeDef shapeDef = b2DefaultShapeDef();
+				shapeDef.density = bc2d.Density;
+				shapeDef.material.friction = bc2d.Friction;
+				shapeDef.material.restitution = bc2d.Restitution;
+				worldDef.restitutionThreshold = bc2d.RestitutionThreshold;
+				// Note: restitutionThreshold is also in shapeDef in v3
 
-				b2FixtureDef fixtureDef;
-				fixtureDef.shape = &boxShape;
-				fixtureDef.density = bc2d.Density;
-				fixtureDef.friction = bc2d.Friction;
-				fixtureDef.restitution = bc2d.Restitution;
-				fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
-				body->CreateFixture(&fixtureDef);
+				// 2. Create the Geometry (Replaces b2PolygonShape)
+				// v3 uses "Half-extents" just like v2, so Size.x * Scale.x is correct 
+				// if your Size represents the half-width.
+				b2Polygon boxShape = b2MakeBox(bc2d.Size.x * transform.Scale.x,
+					bc2d.Size.y * transform.Scale.y);
+
+				// 3. Create the Shape and attach it to the Body
+				// This returns a b2ShapeId which you can store if you need to 
+				// modify the collider later (like changing friction at runtime).
+				b2ShapeId shapeId = b2CreatePolygonShape(rb2d.RuntimeBody, &shapeDef, &boxShape);
+
+				// Optional: Store the ID in your component
+				bc2d.RuntimeFixture = shapeId;
 			}
 		}
 	}
 
 	void Scene::OnRuntimeStop()
 	{
-		delete m_PhysicsWorld;
-		m_PhysicsWorld = nullptr;
+		b2DestroyWorld(m_PhysicsWorld);
+		m_PhysicsWorld = b2_nullWorldId;
 	}
 
 
@@ -114,7 +207,8 @@ namespace Vectora {
 		{
 			const int32_t velocityIterations = 6;
 			const int32_t positionIterations = 2;
-			m_PhysicsWorld->Step(ts, velocityIterations, positionIterations);
+			const int32_t subStepCount = 4;
+			b2World_Step(m_PhysicsWorld, ts, subStepCount);
 
 			// Retrieve transform from Box2D
 			auto view = m_Registry.view<Rigidbody2DComponent>();
@@ -124,11 +218,14 @@ namespace Vectora {
 				auto& transform = entity.GetComponent<TransformComponent>();
 				auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
-				b2Body* body = (b2Body*)rb2d.RuntimeBody;
-				const auto& position = body->GetPosition();
+				//b2Body* body = (b2Body*)rb2d.RuntimeBody;
+				b2Vec2 position = b2Body_GetPosition(rb2d.RuntimeBody);
+				b2Rot rotation = b2Body_GetRotation(rb2d.RuntimeBody);
+				float angle = b2Rot_GetAngle(rotation);
+
 				transform.Translation.x = position.x;
 				transform.Translation.y = position.y;
-				transform.Rotation.z = body->GetAngle();
+				transform.Rotation.z = angle;
 			}
 		}
 
@@ -160,7 +257,7 @@ namespace Vectora {
 			{
 				Renderer2D::BeginScene(*mainCamera, cameraTransform);
 
-				auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+				//auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 				auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
 				// The 'each' method is the preferred modern EnTT way
 				view.each([](auto entity, auto& transform, auto& sprite) {
@@ -169,6 +266,9 @@ namespace Vectora {
 				});
 
 				Renderer2D::EndScene();
+			}
+			else {
+				VE_CORE_CRITICAL("No camera found");
 			}
 		}
 
@@ -207,7 +307,18 @@ namespace Vectora {
 
 
 	}
+	void Scene::DuplicateEntity(Entity entity)
+	{
+		std::string name = entity.GetName();
+		Entity newEntity = CreateEntity(name);
 
+		CopyComponentIfExists<TransformComponent>(newEntity, entity);
+		CopyComponentIfExists<SpriteRendererComponent>(newEntity, entity);
+		CopyComponentIfExists<CameraComponent>(newEntity, entity);
+		CopyComponentIfExists<NativeScriptComponent>(newEntity, entity);
+		CopyComponentIfExists<Rigidbody2DComponent>(newEntity, entity);
+		CopyComponentIfExists<BoxCollider2DComponent>(newEntity, entity);
+	}
 	Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = m_Registry.view<CameraComponent>();
@@ -225,6 +336,11 @@ namespace Vectora {
 	{
 		/*static_assert(false);*/
 		static_assert(sizeof(T) == 0, "This component type does not have a specialized OnComponentAdded implementation!");
+	}
+
+	template<>
+	void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component)
+	{
 	}
 
 	template<>

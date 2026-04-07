@@ -6,13 +6,29 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include "Core/Camera.h"
-#include "Scene/SceneCamera.h"
-#include "Scene/ScriptableEntity.h"
 
+#include "SceneCamera.h"
+#include "Core/UUID.h"
 #include "Renderer/Texture.h"
 
+#include <box2d/box2d.h>
+#include <box2d/base.h>
+#include <box2d/collision.h>
+#include <box2d/types.h>
+#include <box2d/id.h>
 
 namespace Vectora {
+	struct IDComponent
+	{
+		UUID ID;
+
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
+
+		// Add this constructor!
+		IDComponent(const UUID& id) : ID(id) {}
+	};
+
 	struct TagComponent 
 	{
 		std::string Tag;
@@ -49,6 +65,7 @@ namespace Vectora {
 	{
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture;
+		std::filesystem::path texPath;
 		float TilingFactor = 1.0f;
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
@@ -64,6 +81,8 @@ namespace Vectora {
 		CameraComponent(const CameraComponent&) = default;
 		bool FixedAspectRatio = false;
 	};
+
+	class ScriptableEntity;
 
 	struct NativeScriptComponent {
 		ScriptableEntity* Instance = nullptr;
@@ -87,7 +106,7 @@ namespace Vectora {
 		bool FixedRotation = false;
 
 		// Storage for runtime
-		void* RuntimeBody = nullptr;
+		b2BodyId RuntimeBody;
 
 		Rigidbody2DComponent() = default;
 		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
@@ -105,7 +124,7 @@ namespace Vectora {
 		float RestitutionThreshold = 0.5f;
 
 		// Storage for runtime
-		void* RuntimeFixture = nullptr;
+		b2ShapeId RuntimeFixture ;
 
 		BoxCollider2DComponent() = default;
 		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;

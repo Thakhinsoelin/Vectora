@@ -233,7 +233,8 @@ target_precompile_headers(${VE_ENGINE_TARGET} PRIVATE
     "$<$<COMPILE_LANGUAGE:CXX>:vpch.h>"
 )
 
-add_executable(${VE_EDITOR_TARGET} ${EDITOR})
+add_executable(${VE_EDITOR_TARGET} ${EDITOR} ${CMAKE_SOURCE_DIR}/Vectora_Editor/resource.rc)
+
 target_include_directories(${VE_EDITOR_TARGET} PRIVATE
     ${imguizmo_SOURCE_DIR}
     ${DISCORD_SDK_INCLUDE_DIR}

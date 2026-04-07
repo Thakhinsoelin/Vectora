@@ -10,6 +10,8 @@
 
 #include <glad/glad.h>
 
+#include <stb_image.h>
+
 namespace Vectora {
 
 	static VE_UINT8 s_GLFWWindowCount = 0;
@@ -56,6 +58,9 @@ namespace Vectora {
 		this->m_Data.Width = prop.width;
 		this->m_Data.Height = prop.height;
 
+		GLFWimage icon;
+		icon.pixels = stbi_load("Resources/Icons/Vectora.png", &icon.width, &icon.height, 0, 4); // RGBA
+
 		VE_CORE_INFO("Creating window {0} ({1}, {2})", prop.title, prop.width, prop.height);
 		if (s_GLFWWindowCount == 0)
 		{
@@ -72,6 +77,7 @@ namespace Vectora {
 		{
 			VE_PROFILE_SCOPE("glfwCreateWindow");
 			m_Window = glfwCreateWindow(prop.width, prop.height, prop.title, nullptr, nullptr);
+			glfwSetWindowIcon(m_Window, 1, &icon);
 			++s_GLFWWindowCount;
 		}
 

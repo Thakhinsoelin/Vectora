@@ -1,15 +1,6 @@
 Scene: Untitled
 Entities:
-  - Entity: 12837192831273
-    TagComponent:
-      Tag: Empty Entity
-    TransformComponent:
-      Translation: [-0.9120063, 0.346527, -0.19213863]
-      Rotation: [0, 0, 0]
-      Scale: [0.0009116323, 0.76684284, 4.414555]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-  - Entity: 12837192831273
+  - Entity: 3394266393593550210
     TagComponent:
       Tag: Left
     TransformComponent:
@@ -18,7 +9,8 @@ Entities:
       Scale: [1, 1, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-  - Entity: 12837192831273
+      Texture: ./Resources\NiggerFaces\sticker.png
+  - Entity: 15533961693135677796
     TagComponent:
       Tag: Right
     TransformComponent:
@@ -27,7 +19,8 @@ Entities:
       Scale: [1, 1, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-  - Entity: 12837192831273
+      Texture: ./Resources\NiggerFaces\yz.jpg
+  - Entity: 13225693186946507001
     TagComponent:
       Tag: Top
     TransformComponent:
@@ -36,3 +29,4 @@ Entities:
       Scale: [0.9999999, 0.9999999, 0.9999988]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
+      Texture: ./Resources\NiggerFaces\snl.jpg

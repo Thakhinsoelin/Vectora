@@ -102,7 +102,7 @@ namespace Vectora {
 		case Rigidbody2DComponent::BodyType::Kinematic: return "Kinematic";
 		}
 
-		HZ_CORE_ASSERT(false, "Unknown body type");
+		VE_CORE_ASSERT(false, "Unknown body type");
 		return {};
 	}
 
@@ -112,7 +112,7 @@ namespace Vectora {
 		if (bodyTypeString == "Dynamic")   return Rigidbody2DComponent::BodyType::Dynamic;
 		if (bodyTypeString == "Kinematic") return Rigidbody2DComponent::BodyType::Kinematic;
 
-		HZ_CORE_ASSERT(false, "Unknown body type");
+		VE_CORE_ASSERT(false, "Unknown body type");
 		return Rigidbody2DComponent::BodyType::Static;
 	}
 
@@ -122,8 +122,9 @@ namespace Vectora {
 	}
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
+		VE_CORE_ASSERT(entity.HasComponent<IDComponent>());
 		out << YAML::BeginMap; // Entity
-		out << YAML::Key << "Entity" << YAML::Value << "12837192831273"; // TODO: Entity ID goes here
+		out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
 		if (entity.HasComponent<TagComponent>())
 		{
 			out << YAML::Key << "TagComponent";
@@ -165,10 +166,11 @@ namespace Vectora {
 		if (entity.HasComponent<SpriteRendererComponent>())
 		{
 			out << YAML::Key << "SpriteRendererComponent";
-			out << YAML::BeginMap; // SpriteRendererComponent
+			out << YAML::BeginMap; // SpriteRendererComponent and Texture
 			auto& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
-			out << YAML::EndMap; // SpriteRendererComponent
+			out << YAML::Key << "Texture" << YAML::Value << spriteRendererComponent.texPath.string();
+			out << YAML::EndMap; // SpriteRendererComponent and Texture
 		}
 		if (entity.HasComponent<Rigidbody2DComponent>())
 		{
@@ -248,13 +250,13 @@ namespace Vectora {
 		{
 			for (auto entity : entities)
 			{
-				uint64_t uuid = entity["Entity"].as<uint64_t>(); // TODO
+				uint64_t uuid = entity["Entity"].as<uint64_t>();
 				std::string name;
 				auto tagComponent = entity["TagComponent"];
 				if (tagComponent)
 					name = tagComponent["Tag"].as<std::string>();
 				VE_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
-				Entity deserializedEntity = m_Scene->CreateEntity(name);
+				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);
 				auto transformComponent = entity["TransformComponent"];
 				if (transformComponent)
 				{
@@ -284,6 +286,21 @@ namespace Vectora {
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
+					// I hate try catch, but well ....
+					try {
+						src.texPath = std::filesystem::path(spriteRendererComponent["Texture"].as<std::string>());
+
+						
+					}
+					catch (YAML::RepresentationException& e) {
+						VE_WARN("Texture component don't exist {0}", src.texPath.filename().string(), e.msg);
+						
+					}
+					Ref<Texture2D> texture = Texture2D::Create(src.texPath.string());
+					if (texture->IsLoaded())
+						src.Texture = texture;
+					else
+						VE_WARN("Could not load texture {0}", src.texPath.filename().string());
 				}
 
 				auto rigidbody2DComponent = entity["Rigidbody2DComponent"];

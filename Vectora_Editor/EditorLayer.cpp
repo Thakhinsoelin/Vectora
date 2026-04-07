@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Core/CmdArgumentHandler.h"
 #include "Scene/SceneSerializer.h"
 #include "Utils/PlatformUtils.h"
 #include "Math/Math.h"
@@ -32,6 +33,7 @@ namespace Vectora {
 
 		m_ActiveScene = CreateRef<Scene>();
 		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
+		
 #if asdfasfd
 		// Entity
 		auto square = m_ActiveScene->CreateEntity("Green Square");
@@ -85,10 +87,21 @@ namespace Vectora {
 		/*SceneSerializer serializer(m_ActiveScene);
 		serializer.Deserialize("assets/scenes/Example.vectora");*/
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-
+		
 		//OpenScene("../../../Vectora_Editor/sceneees/PinkCubeEC.vectora");
 		/*SceneSerializer serializer(m_ActiveScene);
 		serializer.Serialize("assets/scenes/Example.vectora");*/
+		// Todo
+		const auto& args = CmdArgumentHandler::GetAllArguments();
+		if (args.size() > 1)
+		{
+			std::string filePath = args[1];
+			VE_WARN("Opening scene {0} from command line", filePath);
+			VE_WARN("Current Working directoy of the editor is {0}", std::filesystem::current_path().string());
+			OpenScene(filePath);
+			m_EditorScenePath = std::filesystem::path(filePath);
+		}
+		m_EditorScenePath = std::filesystem::path{};
 	}
 
 	void EditorLayer::OnDetach()
@@ -212,6 +225,8 @@ namespace Vectora {
 		}
 		style.WindowMinSize.x = minWinSizeX;
 
+		
+
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
@@ -275,6 +290,8 @@ namespace Vectora {
 
 		uint64_t textureID = m_FrameBuffer->GetColorAttachmentRendererID();
 		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+		
 
 		if (ImGui::BeginDragDropTarget())
 		{
@@ -374,10 +391,21 @@ namespace Vectora {
 			}
 			case Key::VE_KEY_S:
 			{
-				if (control && shift)
-					SaveSceneAs();
+				if (control)
+				{
+					if (shift)
+						SaveSceneAs();
+					else
+						SaveScene();
+				}
 
 				break;
+			}
+
+			case Key::VE_KEY_D:
+			{
+				if (control)
+					OnDuplicateEntity();
 			}
 
 			// Gizmos
@@ -422,8 +450,11 @@ namespace Vectora {
 
 	void EditorLayer::NewScene()
 	{
-		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_EditorScenePath = std::filesystem::path{};
+		m_EditorScene = CreateRef<Scene>(); // Ensure the base editor scene is reset
+		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+
+		m_ActiveScene = m_EditorScene;
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
@@ -438,6 +469,9 @@ namespace Vectora {
 
 	void EditorLayer::OpenScene(const std::filesystem::path& path)
 	{
+		if (m_SceneState != SceneState::Edit)
+			OnSceneStop();
+
 		if (path.extension().string() != ".vectora")
 		{
 			VE_WARN("Could not load {0} - not a scene file", path.filename().string());
@@ -455,10 +489,24 @@ namespace Vectora {
 		SceneSerializer serializer(newScene);
 		if (serializer.Deserialize(path.string()))
 		{
-			m_ActiveScene = newScene;
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+			m_EditorScene = newScene;
+			if (m_ViewportSize.x > 0.f && m_ViewportSize.y > 0.f)
+			{
+				m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			}
+			m_SceneHierarchyPanel.SetContext(m_EditorScene);
+
+			m_ActiveScene = m_EditorScene;
+			m_EditorScenePath = path;
 		}
+	}
+
+	void EditorLayer::SaveScene()
+	{
+		if (!m_EditorScenePath.empty())
+			SerializeScene(m_ActiveScene, m_EditorScenePath);
+		else
+			SaveSceneAs();
 	}
 
 
@@ -467,21 +515,45 @@ namespace Vectora {
 		std::optional<std::string> filepath = FileDialogs::SaveFile("Vectora Scene (*.vectora)\0*.vectora\0");
 		if (filepath.has_value())
 		{
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(filepath.value());
+			SerializeScene(m_ActiveScene, filepath.value());
+			m_EditorScenePath = filepath.value();
 		}
+	}
+
+	void EditorLayer::SerializeScene(Ref<Scene> scene, const std::filesystem::path& path)
+	{
+		SceneSerializer serializer(scene);
+		serializer.Serialize(path.string());
+	}
+
+	void EditorLayer::OnDuplicateEntity()
+	{
+		if (m_SceneState != SceneState::Edit)
+			return;
+
+		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if (selectedEntity)
+			m_EditorScene->DuplicateEntity(selectedEntity);
 	}
 
 	void EditorLayer::OnScenePlay()
 	{
 		m_SceneState = SceneState::Play;
+
+		m_ActiveScene = Scene::Copy(m_EditorScene);
+		
 		m_ActiveScene->OnRuntimeStart();
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnSceneStop() {
 		m_SceneState = SceneState::Edit;
 		m_ActiveScene->OnRuntimeStop();
+		m_ActiveScene = m_EditorScene;
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
+
 
 	void EditorLayer::UI_Toolbar()
 	{

@@ -52,4 +52,13 @@ namespace Vectora {
 		}
 		return std::string();
 	}
+	std::string FileDialogs::GetExecutablePath()
+	{
+		wchar_t path[MAX_PATH];
+		
+		GetModuleFileNameW(NULL, path, MAX_PATH);
+		std::filesystem::path exePath(path);
+		// parent_path() gets the directory, string() converts to std::string
+		return exePath.parent_path().string();
+	}
 }
