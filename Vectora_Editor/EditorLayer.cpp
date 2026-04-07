@@ -99,7 +99,9 @@ namespace Vectora {
 			VE_WARN("Opening scene {0} from command line", filePath);
 			VE_WARN("Current Working directoy of the editor is {0}", std::filesystem::current_path().string());
 			OpenScene(filePath);
+			m_EditorScenePath = std::filesystem::path(filePath);
 		}
+		m_EditorScenePath = std::filesystem::path{};
 	}
 
 	void EditorLayer::OnDetach()
@@ -389,10 +391,21 @@ namespace Vectora {
 			}
 			case Key::VE_KEY_S:
 			{
-				if (control && shift)
-					SaveSceneAs();
+				if (control)
+				{
+					if (shift)
+						SaveSceneAs();
+					else
+						SaveScene();
+				}
 
 				break;
+			}
+
+			case Key::VE_KEY_D:
+			{
+				if (control)
+					OnDuplicateEntity();
 			}
 
 			// Gizmos
@@ -437,8 +450,11 @@ namespace Vectora {
 
 	void EditorLayer::NewScene()
 	{
-		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_EditorScenePath = std::filesystem::path{};
+		m_EditorScene = CreateRef<Scene>(); // Ensure the base editor scene is reset
+		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+
+		m_ActiveScene = m_EditorScene;
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
@@ -453,6 +469,9 @@ namespace Vectora {
 
 	void EditorLayer::OpenScene(const std::filesystem::path& path)
 	{
+		if (m_SceneState != SceneState::Edit)
+			OnSceneStop();
+
 		if (path.extension().string() != ".vectora")
 		{
 			VE_WARN("Could not load {0} - not a scene file", path.filename().string());
@@ -470,14 +489,24 @@ namespace Vectora {
 		SceneSerializer serializer(newScene);
 		if (serializer.Deserialize(path.string()))
 		{
-			m_ActiveScene = newScene;
+			m_EditorScene = newScene;
 			if (m_ViewportSize.x > 0.f && m_ViewportSize.y > 0.f)
 			{
-				m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-
+				m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			}
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+			m_SceneHierarchyPanel.SetContext(m_EditorScene);
+
+			m_ActiveScene = m_EditorScene;
+			m_EditorScenePath = path;
 		}
+	}
+
+	void EditorLayer::SaveScene()
+	{
+		if (!m_EditorScenePath.empty())
+			SerializeScene(m_ActiveScene, m_EditorScenePath);
+		else
+			SaveSceneAs();
 	}
 
 
@@ -486,21 +515,45 @@ namespace Vectora {
 		std::optional<std::string> filepath = FileDialogs::SaveFile("Vectora Scene (*.vectora)\0*.vectora\0");
 		if (filepath.has_value())
 		{
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(filepath.value());
+			SerializeScene(m_ActiveScene, filepath.value());
+			m_EditorScenePath = filepath.value();
 		}
+	}
+
+	void EditorLayer::SerializeScene(Ref<Scene> scene, const std::filesystem::path& path)
+	{
+		SceneSerializer serializer(scene);
+		serializer.Serialize(path.string());
+	}
+
+	void EditorLayer::OnDuplicateEntity()
+	{
+		if (m_SceneState != SceneState::Edit)
+			return;
+
+		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if (selectedEntity)
+			m_EditorScene->DuplicateEntity(selectedEntity);
 	}
 
 	void EditorLayer::OnScenePlay()
 	{
 		m_SceneState = SceneState::Play;
+
+		m_ActiveScene = Scene::Copy(m_EditorScene);
+		
 		m_ActiveScene->OnRuntimeStart();
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnSceneStop() {
 		m_SceneState = SceneState::Edit;
 		m_ActiveScene->OnRuntimeStop();
+		m_ActiveScene = m_EditorScene;
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
+
 
 	void EditorLayer::UI_Toolbar()
 	{

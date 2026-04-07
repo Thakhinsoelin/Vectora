@@ -1,6 +1,6 @@
 Scene: Untitled
 Entities:
-  - Entity: 12837192831273
+  - Entity: 3394266393593550210
     TagComponent:
       Tag: Left
     TransformComponent:
@@ -10,7 +10,7 @@ Entities:
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
       Texture: ./Resources\NiggerFaces\sticker.png
-  - Entity: 12837192831273
+  - Entity: 15533961693135677796
     TagComponent:
       Tag: Right
     TransformComponent:
@@ -20,7 +20,7 @@ Entities:
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
       Texture: ./Resources\NiggerFaces\yz.jpg
-  - Entity: 12837192831273
+  - Entity: 13225693186946507001
     TagComponent:
       Tag: Top
     TransformComponent:

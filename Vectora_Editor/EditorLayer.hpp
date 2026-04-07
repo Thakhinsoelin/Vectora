@@ -28,11 +28,14 @@ namespace Vectora
 		void OpenScene();
 		//void OpenScene(const std::string& filepath);
 		void OpenScene(const std::filesystem::path& path);
+		void SaveScene();
 		void SaveSceneAs();
 
 		void OnScenePlay();
 		void OnSceneStop();
-
+		void SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
+		
+		void OnDuplicateEntity();
 		// UI Panels
 		void UI_Toolbar();
 
@@ -67,6 +70,8 @@ namespace Vectora
 		Entity m_CameraEntity;
 		Entity m_SecondCamera;
 		Entity m_HoveredEntity;
+		Ref<Scene> m_EditorScene;
+		std::filesystem::path m_EditorScenePath;
 
 		glm::vec2 m_ViewportBounds[2];
 		int m_GizmoType = -1;

@@ -1,31 +1,15 @@
-[16:06:21] [warning] APP: Current Working directoy of the editor is D:\Dev\c++proj\DragonFly\Vectora_Editor\Resources\sceneees
-[16:06:21] [warning] APP: Current Working directoy of the editor after fix is D:\Dev\c++proj\DragonFly\build\bin\Debug-Win64
-[16:06:21] [info] VECTORA: Creating window Vectora Engine (1600, 900)
-[16:06:21] [info] VECTORA: Initializing GLFW
-[16:06:21] [info] VECTORA: Opengl info:
-[16:06:21] [info] VECTORA:     Vendor: Intel
-[16:06:21] [info] VECTORA:     Renderer: Intel(R) Iris(R) Xe Graphics
-[16:06:21] [info] VECTORA:     Version: 4.6.0 - Build 32.0.101.7076
-[16:06:21] [warning] APP: Opening scene D:\Dev\c++proj\DragonFly\Vectora_Editor\Resources\sceneees\3DDemo.vectora from command line
-[16:06:22] [warning] APP: Current Working directoy of the editor is D:\Dev\c++proj\DragonFly\build\bin\Debug-Win64
-[16:06:22] [trace] VECTORA: Deserializing scene 'Untitled'
-[16:06:22] [trace] VECTORA: Deserialized entity with ID = 12837192831273, name = Green Square
-[16:06:22] [warning] APP: Texture component don't exist 
-[16:06:22] [warning] APP: Could not load texture 
-[16:06:22] [trace] VECTORA: Deserialized entity with ID = 12837192831273, name = Red Square
-[16:06:22] [warning] APP: Texture component don't exist 
-[16:06:22] [warning] APP: Could not load texture 
-[16:06:22] [trace] VECTORA: Deserialized entity with ID = 12837192831273, name = Camera A
-[16:06:22] [trace] VECTORA: Deserialized entity with ID = 12837192831273, name = Camera B
-[16:06:46] [trace] VECTORA: Deserializing scene 'Untitled'
-[16:06:46] [trace] VECTORA: Deserialized entity with ID = 12837192831273, name = Top
-[16:06:46] [warning] APP: Texture component don't exist 
-[16:06:46] [warning] APP: Could not load texture 
-[16:06:46] [trace] VECTORA: Deserialized entity with ID = 12837192831273, name = Camera
-[16:06:46] [trace] VECTORA: Deserialized entity with ID = 12837192831273, name = Right
-[16:06:46] [warning] APP: Texture component don't exist 
-[16:06:46] [warning] APP: Could not load texture 
-[16:06:46] [trace] VECTORA: Deserialized entity with ID = 12837192831273, name = Left
-[16:06:46] [warning] APP: Texture component don't exist 
-[16:06:46] [warning] APP: Could not load texture 
-[16:06:59] [info] VECTORA: Terminating GLFW
+[15:16:59] [info] VECTORA: Creating window Vectora Engine (1600, 900)
+[15:16:59] [info] VECTORA: Initializing GLFW
+[15:16:59] [info] VECTORA: Opengl info:
+[15:16:59] [info] VECTORA:     Vendor: Intel
+[15:16:59] [info] VECTORA:     Renderer: Intel(R) Iris(R) Xe Graphics
+[15:16:59] [info] VECTORA:     Version: 4.6.0 - Build 32.0.101.7076
+[15:16:59] [warning] APP: Opening scene D:\Dev\c++proj\DragonFly\Vectora_Editor\Resources\sceneees\Debug-Win64.vectora from command line
+[15:16:59] [warning] APP: Current Working directoy of the editor is D:\Dev\c++proj\DragonFly\build\bin\Debug-Win64
+[15:16:59] [trace] VECTORA: Deserializing scene 'Untitled'
+[15:16:59] [trace] VECTORA: Deserialized entity with ID = 10019997942034776821, name = Empty Entity
+[15:17:00] [warning] APP: Could not load texture 
+[15:17:00] [trace] VECTORA: Deserialized entity with ID = 17744943614311845587, name = Empty Entity
+[15:17:00] [trace] VECTORA: Deserialized entity with ID = 18031216967968104188, name = Empty Entity
+[15:17:00] [warning] APP: Could not load texture 
+[15:17:17] [info] VECTORA: Terminating GLFW

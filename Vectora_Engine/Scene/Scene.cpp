@@ -46,6 +46,64 @@ namespace Vectora {
 	{
 	}
 
+	template<typename Component>
+	static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap, Scene* dstScene)
+	{
+		auto view = src.view<Component>();
+		for (auto e : view)
+		{
+			UUID uuid = src.get<IDComponent>(e).ID;
+			VE_CORE_ASSERT(enttMap.find(uuid) != enttMap.end());
+			entt::entity dstEnttID = enttMap.at(uuid);
+
+			auto& component = src.get<Component>(e);
+			Entity dstEntity = { dstEnttID, dstScene };
+			dstEntity.AddOrReplaceComponent<Component>(component);
+		}
+	}
+
+	template<typename Component>
+	static void CopyComponentIfExists(Entity dst, Entity src)
+	{
+		if (src.HasComponent<Component>())
+			dst.AddOrReplaceComponent<Component>(src.GetComponent<Component>());
+	}
+
+	Ref<Scene> Scene::Copy(Ref<Scene> other)
+	{
+		Ref<Scene> newScene = CreateRef<Scene>();
+
+		newScene->m_ViewportWidth = other->m_ViewportWidth > 0 ? (uint32_t)other->m_ViewportWidth : 1280;
+		newScene->m_ViewportHeight = other->m_ViewportHeight > 0 ? (uint32_t)other->m_ViewportHeight : 720;
+
+		//newScene->OnViewportResize(newScene->m_ViewportWidth, newScene->m_ViewportHeight);
+
+		auto& srcSceneRegistry = other->m_Registry;
+		auto& dstSceneRegistry = newScene->m_Registry;
+		std::unordered_map<UUID, entt::entity> enttMap;
+
+		// Create entities in new scene
+		auto idView = srcSceneRegistry.view<IDComponent>();
+		for (auto e : idView)
+		{
+			UUID uuid = srcSceneRegistry.get<IDComponent>(e).ID;
+			const auto& name = srcSceneRegistry.get<TagComponent>(e).Tag;
+			Entity newEntity = newScene->CreateEntityWithUUID(uuid, name);
+			enttMap[uuid] = (entt::entity)newEntity;
+		}
+
+		// Copy components (except IDComponent and TagComponent)
+		CopyComponent<CameraComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+		CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+		CopyComponent<SpriteRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+		CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+		CopyComponent<Rigidbody2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+		CopyComponent<BoxCollider2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+
+		newScene->OnViewportResize(newScene->m_ViewportWidth, newScene->m_ViewportHeight);
+		return newScene;
+	}
+
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		return CreateEntityWithUUID(UUID(), name);
@@ -199,7 +257,7 @@ namespace Vectora {
 			{
 				Renderer2D::BeginScene(*mainCamera, cameraTransform);
 
-				auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+				//auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 				auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
 				// The 'each' method is the preferred modern EnTT way
 				view.each([](auto entity, auto& transform, auto& sprite) {
@@ -208,6 +266,9 @@ namespace Vectora {
 				});
 
 				Renderer2D::EndScene();
+			}
+			else {
+				VE_CORE_CRITICAL("No camera found");
 			}
 		}
 
@@ -246,7 +307,18 @@ namespace Vectora {
 
 
 	}
+	void Scene::DuplicateEntity(Entity entity)
+	{
+		std::string name = entity.GetName();
+		Entity newEntity = CreateEntity(name);
 
+		CopyComponentIfExists<TransformComponent>(newEntity, entity);
+		CopyComponentIfExists<SpriteRendererComponent>(newEntity, entity);
+		CopyComponentIfExists<CameraComponent>(newEntity, entity);
+		CopyComponentIfExists<NativeScriptComponent>(newEntity, entity);
+		CopyComponentIfExists<Rigidbody2DComponent>(newEntity, entity);
+		CopyComponentIfExists<BoxCollider2DComponent>(newEntity, entity);
+	}
 	Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = m_Registry.view<CameraComponent>();
