@@ -92,6 +92,8 @@ namespace Vectora {
 		/*SceneSerializer serializer(m_ActiveScene);
 		serializer.Serialize("assets/scenes/Example.vectora");*/
 		// Todo
+		m_EditorScene = CreateRef<Scene>(); // Ensure the base editor scene is reset
+		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		const auto& args = CmdArgumentHandler::GetAllArguments();
 		if (args.size() > 1)
 		{
@@ -101,7 +103,11 @@ namespace Vectora {
 			OpenScene(filePath);
 			m_EditorScenePath = std::filesystem::path(filePath);
 		}
-		m_EditorScenePath = std::filesystem::path{};
+		else {
+			m_EditorScenePath = std::filesystem::path{};
+
+		}
+
 	}
 
 	void EditorLayer::OnDetach()

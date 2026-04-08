@@ -96,6 +96,7 @@ namespace Vectora {
 		CopyComponent<CameraComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
 		CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
 		CopyComponent<SpriteRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
+		CopyComponent<CircleRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
 		CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
 		CopyComponent<Rigidbody2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
 		CopyComponent<BoxCollider2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap, newScene.get());
@@ -257,14 +258,24 @@ namespace Vectora {
 			{
 				Renderer2D::BeginScene(*mainCamera, cameraTransform);
 
-				//auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-				auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
-				// The 'each' method is the preferred modern EnTT way
-				view.each([](auto entity, auto& transform, auto& sprite) {
-					//Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
-					Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
-				});
-
+				{
+					//auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+					auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
+					// The 'each' method is the preferred modern EnTT way
+					view.each([](auto entity, auto& transform, auto& sprite) {
+						//Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+						Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+						});
+				}
+				{
+					//auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+					auto view = m_Registry.view<TransformComponent, CircleRendererComponent>();
+					// The 'each' method is the preferred modern EnTT way
+					view.each([](auto entity, auto& transform, auto& circle) {
+						//Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+						Renderer2D::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
+						});
+				}
 				Renderer2D::EndScene();
 			}
 			else {
@@ -287,6 +298,13 @@ namespace Vectora {
 			//Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
 			Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
 		}
+
+		auto view = m_Registry.view<TransformComponent, CircleRendererComponent>();
+		// The 'each' method is the preferred modern EnTT way
+		view.each([](auto entity, auto& transform, auto& circle) {
+			//Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+			Renderer2D::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
+			});
 
 		Renderer2D::EndScene();
 	}
@@ -314,6 +332,7 @@ namespace Vectora {
 
 		CopyComponentIfExists<TransformComponent>(newEntity, entity);
 		CopyComponentIfExists<SpriteRendererComponent>(newEntity, entity);
+		CopyComponentIfExists<CircleRendererComponent>(newEntity, entity);
 		CopyComponentIfExists<CameraComponent>(newEntity, entity);
 		CopyComponentIfExists<NativeScriptComponent>(newEntity, entity);
 		CopyComponentIfExists<Rigidbody2DComponent>(newEntity, entity);
@@ -345,6 +364,11 @@ namespace Vectora {
 
 	template<>
 	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<CircleRendererComponent>(Entity entity, CircleRendererComponent& component)
 	{
 	}
 
