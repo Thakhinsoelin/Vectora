@@ -10,5 +10,9 @@ namespace Vectora {
 		virtual void SetClearColor(const glm::vec4& color) override final;
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray) override final;
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, VE_UINT32 indexCount = 0) override final;
+
+		virtual void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount) override final;
+
+		virtual void SetLineWidth(float width) override final;
 	};
 }

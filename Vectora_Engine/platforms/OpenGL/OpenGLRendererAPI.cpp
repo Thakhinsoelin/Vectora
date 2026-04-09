@@ -38,9 +38,22 @@ namespace Vectora {
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);*/
 	}
 
+	void OpenGLRendererAPI::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+	{
+		glDrawArrays(GL_LINES, 0, vertexCount);
+		glActiveTexture(GL_TEXTURE0);
+	}
+
+	void OpenGLRendererAPI::SetLineWidth(float width)
+	{
+		glLineWidth(width);
+	}
+
 	void OpenGLRendererAPI::Init() {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
+
+		glEnable(GL_LINE_SMOOTH);
 	}
 }
