@@ -18,9 +18,20 @@ namespace Vectora {
 		inline static void SetClearColor(const glm::vec4& color) {
 			s_RendererAPI->SetClearColor(color);
 		}
-		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray, VE_UINT32 count = 0) {
-			s_RendererAPI->DrawIndexed(vertexArray, count);
+		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray, VE_UINT32 vertexCount = 0) {
+			s_RendererAPI->DrawIndexed(vertexArray, vertexCount);
 		};
+
+		static void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+		{
+			s_RendererAPI->DrawLines(vertexArray, vertexCount);
+		}
+
+		static void SetLineWidth(float width)
+		{
+			s_RendererAPI->SetLineWidth(width);
+		}
+
 	private:
 		static Scope<RendererAPI> s_RendererAPI;
 	};
