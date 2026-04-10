@@ -32,7 +32,7 @@ namespace Vectora {
 	struct LineVertex
 	{
 		glm::vec3 Position;
-		float Padding = 0.0f; // Manually fill the 4-byte hole
+		//float Padding = 0.0f; // Manually fill the 4-byte hole
 		glm::vec4 Color;
 
 		// Editor-only
