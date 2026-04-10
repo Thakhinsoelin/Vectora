@@ -38,8 +38,13 @@ namespace Vectora {
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);*/
 	}
 
+	// THis is the actual meat of the draw line function.
 	void OpenGLRendererAPI::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
 	{
+		// I FCKING FORGOT THIS LINE. THAT IS WHY EVERYTHING WAS GOING WRONG
+		// THIS FCKING LINE, a single line messed me up for this entire fcking day
+		vertexArray->Bind();
+
 		glDrawArrays(GL_LINES, 0, vertexCount);
 		//glActiveTexture(GL_TEXTURE0);
 	}

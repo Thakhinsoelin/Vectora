@@ -549,30 +549,39 @@ namespace Vectora {
 		serializer.Serialize(path.string());
 	}
 
+	// This function is the logic, that visualize bound colliders
 	void EditorLayer::OnOverlayRender()
 	{
 		if (m_SceneState == SceneState::Play)
 		{
+			// first, get the active camera
 			Entity camera = m_ActiveScene->GetPrimaryCameraEntity();
-			if (!camera)
-				return; // Early return if no camera in Play mode to avoid unbalanced Begin/End calls
-			
-			Renderer2D::BeginScene(camera.GetComponent<CameraComponent>().camera, camera.GetComponent<TransformComponent>().GetTransform());
+			if (camera)
+				Renderer2D::BeginScene(camera.GetComponent<CameraComponent>().camera, camera.GetComponent<TransformComponent>().GetTransform());
 		}
 		else
 		{
 			Renderer2D::BeginScene(m_EditorCamera);
 		}
 
+		
 		if (m_ShowPhysicsColliders)
 		{
 			// Box Colliders
 			{
+				// This is the meat of the function. I am getting all the active components and 
+				// looping through them. Transform component is  just position, and box collider is physics
+
+
+				// If anything is wrong, this part is the problem
+
+				// So it seems, this wasn't the problem
 				auto view = m_ActiveScene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
 				view.each([](auto entity, auto& tc, auto& bc2d)
 					{
 						glm::vec3 translation = tc.Translation + glm::vec3(bc2d.Offset, 0.001f);
 						glm::vec3 scale = tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
+
 
 						glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
 							* glm::rotate(glm::mat4(1.0f), tc.Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
@@ -618,6 +627,7 @@ namespace Vectora {
 		m_ActiveScene = Scene::Copy(m_EditorScene);
 		
 		m_ActiveScene->OnRuntimeStart();
+		//OnOverlayRender();
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
