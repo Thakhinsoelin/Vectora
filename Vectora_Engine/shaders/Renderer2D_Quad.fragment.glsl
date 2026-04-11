@@ -34,6 +34,8 @@ void main()
 		case 14: texColor *= texture(u_Textures[14], v_TexCoord * v_TilingFactor); break;
 		case 15: texColor *= texture(u_Textures[15], v_TexCoord * v_TilingFactor); break;
 	}
+	if (texColor.a == 0.0)
+		discard;
 	o_Color = texColor;
 	o_EntityID = v_EntityID;
 }

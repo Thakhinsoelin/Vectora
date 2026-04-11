@@ -20,12 +20,18 @@ auto do_something() -> auto {
 namespace Vectora {
 	Application* Application::s_Instance = nullptr;
 	
-	Application::Application(const std::string& name)
+	Application::Application(const ApplicationSpecification& specification)
+		:m_Specification(specification)
 	{
 		VE_PROFILE_FUNCTION();
 
 		VE_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
+
+		// Set working directory here
+		if (!m_Specification.WorkingDirectory.empty())
+			std::filesystem::current_path(m_Specification.WorkingDirectory);
+
 		window = Window::Create();
 		window->SetVSync(false);
 		window->SetEventCallback(VE_BIND_EVENT_FN(Application::OnEvent));

@@ -174,7 +174,8 @@ private:
 
 class SandBox : public Vectora::Application {
 public:
-    SandBox() {
+    SandBox(const Vectora::ApplicationSpecification& spec)
+	: Vectora::Application(spec){
 		//PushLayer(new TestLayer() );
 		PushLayer(new Sandbox2D());
 		/*PushLayer(new BackGround());
@@ -191,5 +192,8 @@ public:
 };
 
 Vectora::Application* Vectora::CreateApplication() {
-    return new SandBox();
+	ApplicationSpecification spec;
+	spec.Name = "Sandbox";
+	spec.WorkingDirectory = "./";
+    return new SandBox(spec);
 }

@@ -20,10 +20,16 @@
 int main(int argc, char** argv);
 
 namespace Vectora {
+	struct ApplicationSpecification
+	{
+		std::string Name = "Hazel Application";
+		std::string WorkingDirectory;
+	};
+
 	class VECTORA_API Application
 	{
 	public:
-		Application(const std::string& name = "Vectora Main App");
+		Application(const ApplicationSpecification& specification);
 		virtual ~Application();
 
 		void OnEvent(Event& e);
@@ -37,6 +43,7 @@ namespace Vectora {
 
 		inline static Application& Get() { return *s_Instance; }
 
+		const ApplicationSpecification& GetSpecification() { return m_Specification; }
 		void SetRunning(bool run) {
 			this->m_Running = run;
 		}
@@ -59,6 +66,7 @@ namespace Vectora {
 
 		static Application* s_Instance;
 		friend int ::main(int argc, char** argv);
+		ApplicationSpecification m_Specification;
 	};
 	Application* CreateApplication();
 }

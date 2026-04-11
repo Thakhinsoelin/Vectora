@@ -15,7 +15,7 @@
 namespace Vectora {
     class SandBox : public Application {
     public:
-        SandBox() : Application("Vectora Editor"){
+        SandBox(const Vectora::ApplicationSpecification& spec) : Application(spec){
             PushLayer(new EditorLayer());
             // SYNC CONTEXT: This prevents the Segfault.
             // Only turns this on if you were building the core as a dll and linking to your app dynamically.
@@ -28,6 +28,9 @@ namespace Vectora {
     };
 
     Application* CreateApplication() {
-        return new SandBox();
+        ApplicationSpecification spec;
+        spec.Name = "Vectora Editor";
+        spec.WorkingDirectory = "./";
+        return new SandBox(spec);
     }
 }
