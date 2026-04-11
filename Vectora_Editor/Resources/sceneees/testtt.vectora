@@ -4,8 +4,8 @@ Entities:
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [2.2173767, 1.135256, 0]
-      Rotation: [0, 0, 1.8099704]
+      Translation: [1.2130706, -1.7434411, 0]
+      Rotation: [0, 0, -1.9420472]
       Scale: [1.0000001, 1.0000001, 1]
     CircleRendererComponent:
       Color: [0.9034749, 0.32760575, 0.0209299, 1]
@@ -26,7 +26,7 @@ Entities:
       Tag: Floor
     TransformComponent:
       Translation: [2.3506453, -1.8453996, 0]
-      Rotation: [0, 0, 0.604025]
+      Rotation: [0, 0, 0.6043567]
       Scale: [6.7419696, 0.46067816, 1]
     SpriteRendererComponent:
       Color: [0.9498069, 0.4553014, 0.06600974, 1]
@@ -45,8 +45,8 @@ Entities:
     TagComponent:
       Tag: Sprite
     TransformComponent:
-      Translation: [-0.096012086, 1.3406142, 0.02251478]
-      Rotation: [0, 0, 0.93144524]
+      Translation: [0.486489, -1.60117, 0.02251478]
+      Rotation: [0, 0, 0.931357]
       Scale: [0.3611597, 0.37557206, 0.84813577]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
@@ -84,7 +84,7 @@ Entities:
       Tag: Floor
     TransformComponent:
       Translation: [-0.8831757, -1.0944793, 0]
-      Rotation: [0, 0, -0.63925743]
+      Rotation: [0, 0, -0.6395185]
       Scale: [6.7419677, 0.46067813, 1]
     SpriteRendererComponent:
       Color: [0.9498069, 0.4553014, 0.06600974, 1]

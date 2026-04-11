@@ -61,4 +61,9 @@ namespace Vectora {
 		// parent_path() gets the directory, string() converts to std::string
 		return exePath.parent_path().string();
 	}
+
+	float Time::GetTime()
+	{
+		return glfwGetTime();
+	}
 }

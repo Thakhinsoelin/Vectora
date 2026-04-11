@@ -28,7 +28,7 @@ namespace Vectora {
 
 
 		virtual bool operator==(const Texture& other) const override final {
-			return m_RendererID == ((OpenGLTexture2D&)other).m_RendererID;
+			return m_RendererID == other.GetRendererID();
 		};
 	private:
 		bool m_IsLoaded = false;

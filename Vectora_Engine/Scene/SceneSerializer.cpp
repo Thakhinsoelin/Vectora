@@ -265,8 +265,9 @@ namespace Vectora {
 		{
 			data = YAML::LoadFile(filepath);
 		}
-		catch (const std::exception&)
+		catch (const YAML::ParserException& e)
 		{
+			VE_CORE_ERROR("Failed to load .vectora file '{0}'\n     {1}", filepath, e.what());
 			return false;
 		}
 		if (!data["Scene"])

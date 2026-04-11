@@ -54,7 +54,7 @@ namespace Vectora {
 			NewScene();
 
 		}
-
+		Renderer2D::SetLineWidth(4.0f);
 	}
 
 	void EditorLayer::OnDetach()
@@ -333,7 +333,11 @@ namespace Vectora {
 	void EditorLayer::OnEvent(Event& e)
 	{
 		m_CameraController.OnEvent(e);
-		m_EditorCamera.OnEvent(e);
+		if (m_SceneState == SceneState::Edit)
+		{
+			m_EditorCamera.OnEvent(e);
+
+		}
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(VE_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
 		dispatcher.Dispatch<MouseButtonPressedEvent>(VE_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
@@ -479,6 +483,7 @@ namespace Vectora {
 
 	void EditorLayer::SaveScene()
 	{
+		// Has to care about this
 		if (!m_EditorScenePath.empty())
 			SerializeScene(m_ActiveScene, m_EditorScenePath);
 		else
@@ -552,6 +557,12 @@ namespace Vectora {
 						Renderer2D::DrawCircle(transform, glm::vec4(0, 1, 0, 1), 0.01f);
 					});
 			}
+		}
+
+		if (Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity())
+		{
+			const TransformComponent& transform = selectedEntity.GetComponent<TransformComponent>();
+			Renderer2D::DrawRect(transform.GetTransform(), glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
 		}
 
 		Renderer2D::EndScene();
@@ -656,5 +667,7 @@ namespace Vectora {
 		ImGui::PopStyleColor(3);
 		ImGui::End();
 	}
+
+
 	
 }

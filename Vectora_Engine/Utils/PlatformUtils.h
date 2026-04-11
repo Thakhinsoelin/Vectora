@@ -11,4 +11,10 @@ namespace Vectora {
 
 		static std::string GetExecutablePath();
 	};
+
+	class Time
+	{
+	public:
+		static float GetTime();
+	};
 }

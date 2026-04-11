@@ -1,20 +1,20 @@
-#include "Core/Application.h"
 #include "vpch.h"
-#include "Events/Event.h"
 #include "Core/Input.h"
+#include "Core/Application.h"
+#include "Events/Event.h"
 #include "Events/ApplicationEvent.h"
 #include "Debug/Instrumentor.h"
+#include "Utils/PlatformUtils.h"
+
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/RenderCommand.h"
 #include <imgui.h>
-//#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
 // This is stupid. C++ 20 magic
 auto do_something() -> auto {
-	return 3;
-	//return Vectora::Application();
+	return;
 }
 
 namespace Vectora {
@@ -53,7 +53,7 @@ namespace Vectora {
 		VE_PROFILE_FUNCTION();
 		while (m_Running) {
 			VE_PROFILE_SCOPE("RunLoop");
-			float time = (float)glfwGetTime();
+			float time = Time::GetTime();
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
