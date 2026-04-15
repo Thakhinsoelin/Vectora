@@ -7,7 +7,7 @@
 namespace Vectora {
 
 	struct ScriptEngineData {
-		MonoDomain* RootData = nullptr;
+		MonoDomain* RootDomain = nullptr;
 		MonoDomain* AppDomain = nullptr;
 
 		MonoAssembly* CoreAssembly = nullptr;
@@ -89,12 +89,13 @@ namespace Vectora {
 
 	void ScriptEngine::Init()
 	{
-		InitMono();
 		s_Data = new ScriptEngineData();
+		InitMono();
 
 	}
 	void ScriptEngine::Shutdown()
 	{
+		ShutdownMono();
 		delete s_Data;
 	}
 
@@ -106,16 +107,37 @@ namespace Vectora {
 		VE_CORE_ASSERT(rootDomain);
 
 		// Store the root domain pointer
-		s_Data->RootData = rootDomain;
+		s_Data->RootDomain = rootDomain;
 		std::string tt = "VectoraAppDomain";
 		s_Data->AppDomain = mono_domain_create_appdomain(const_cast<char*>("VectoraScriptRuntime"), nullptr);
 		mono_domain_set(s_Data->AppDomain, true);
 
 		s_Data->CoreAssembly = LoadCSharpAssembly("Vectora-ScriptCore.dll");
 		PrintAssemblyTypes(s_Data->CoreAssembly);
+
+		MonoImage* assemblyImage = mono_assembly_get_image(s_Data->CoreAssembly);
+		MonoClass* monoClass = mono_class_from_name(assemblyImage, "Vectora", "Main");
+
+		MonoObject* instance = mono_object_new(s_Data->AppDomain, monoClass);
+		mono_runtime_object_init(instance);
+
+
+		int value = 5;
+		void* param = &value;
+		void* args[] = { &value };
+		MonoMethod* printMessageInt = mono_class_get_method_from_name(monoClass, "PrintCustomInt", 1);
+		mono_runtime_invoke(printMessageInt, instance, args, nullptr);
+
+		MonoString* monoString = mono_string_new(s_Data->AppDomain, "Hello from C++");
+		void* stringArgs[] = { monoString };
+		MonoMethod* printCustomMessage = mono_class_get_method_from_name(monoClass, "PrintCustomMessage", 1);
+		mono_runtime_invoke(printCustomMessage, instance, stringArgs, nullptr);
 	}
 	void ScriptEngine::ShutdownMono()
 	{
-
+		mono_domain_unload(s_Data->AppDomain);
+		s_Data->AppDomain = nullptr;
+		mono_jit_cleanup(s_Data->RootDomain);
+		s_Data->RootDomain = nullptr;
 	}
 }

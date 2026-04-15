@@ -224,7 +224,6 @@ set_target_properties(${VE_ENGINE_TARGET} PROPERTIES
 target_link_libraries(${VE_ENGINE_TARGET} PUBLIC
     ${DISCORD_LIB_PATH}
     ${MONO_STATIC_LIB}           # <--- Mono Static Library
-
     # --- Windows System Dependencies for Mono ---
     Bcrypt.lib                   # Cryptography/Hashing
     version.lib                  # File versioning
@@ -233,16 +232,6 @@ target_link_libraries(${VE_ENGINE_TARGET} PUBLIC
     Rpcrt4.lib                   # RPC (Required for Mono threading/UUIDs)
     Shlwapi.lib                  # Shell API (Path handling)
     
-    # --- Static C/C++ Runtime Linking (Fixes the __imp_ errors) ---
-    # These libraries provide the static versions of the functions Mono is looking for
-    $<$<CONFIG:Debug>:libcmtd.lib>    # Static Debug CRT
-    $<$<CONFIG:Debug>:libcpmtd.lib>   # Static Debug C++ Standard Lib
-    $<$<CONFIG:Release>:libcmt.lib>   # Static Release CRT
-    $<$<CONFIG:Release>:libcpmt.lib>  # Static Release C++ Standard Lib
-
-    libucrt.lib                  # Static Universal CRT
-    libvcruntime.lib             # Static VC Runtime
-
     yaml-cpp
     imgui_static
     glfw
