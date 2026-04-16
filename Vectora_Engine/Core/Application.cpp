@@ -53,6 +53,8 @@ namespace Vectora {
 	Application::~Application()
 	{
 		VE_PROFILE_FUNCTION();
+
+		ScriptEngine::Shutdown();
 		Renderer::Shutdown();
 	}
 
