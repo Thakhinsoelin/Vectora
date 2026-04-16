@@ -1,5 +1,7 @@
 #include "vpch.h"
 #include "ScriptEngine.h"
+#include "Vectora.h"
+
 
 #include "mono/jit/jit.h"
 #include "mono/metadata/assembly.h"
@@ -99,6 +101,19 @@ namespace Vectora {
 		delete s_Data;
 	}
 
+	static void NativeLog(MonoString* text, int param) {
+		char* cStr = mono_string_to_utf8(text);
+		std::string str(cStr);
+		mono_free(cStr);
+		std::cout << str << ", " << param << "\n";
+	}
+
+	static void NativeLogV3(glm::vec3* parameter) {
+		//VE_CORE_WARN("Value: {0}", *parameter);
+		glm::vec3 ran(1.f, 2.f, 3.f);
+		VE_WARN("{0}", ran);
+	}
+
 	void ScriptEngine::InitMono()
 	{
 		mono_set_assemblies_path("mono");
@@ -111,6 +126,9 @@ namespace Vectora {
 		std::string tt = "VectoraAppDomain";
 		s_Data->AppDomain = mono_domain_create_appdomain(const_cast<char*>("VectoraScriptRuntime"), nullptr);
 		mono_domain_set(s_Data->AppDomain, true);
+
+		mono_add_internal_call("Vectora.Main::NativeLog", NativeLog);
+		mono_add_internal_call("Vectora.Main::NativeLog_Vector", NativeLogV3);
 
 		s_Data->CoreAssembly = LoadCSharpAssembly("Vectora-ScriptCore.dll");
 		PrintAssemblyTypes(s_Data->CoreAssembly);
@@ -135,9 +153,9 @@ namespace Vectora {
 	}
 	void ScriptEngine::ShutdownMono()
 	{
-		mono_domain_unload(s_Data->AppDomain);
+		//mono_domain_unload(s_Data->AppDomain);
 		s_Data->AppDomain = nullptr;
-		mono_jit_cleanup(s_Data->RootDomain);
+		//mono_jit_cleanup(s_Data->RootDomain);
 		s_Data->RootDomain = nullptr;
 	}
 }
