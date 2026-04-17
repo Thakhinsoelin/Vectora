@@ -89,6 +89,13 @@ namespace Vectora {
 		bool FixedAspectRatio = false;
 	};
 
+	struct ScriptComponent {
+		std::string Name;
+
+		ScriptComponent() = default;
+		ScriptComponent(const ScriptComponent&) = default;
+	};
+
 	class ScriptableEntity;
 
 	struct NativeScriptComponent {
@@ -161,6 +168,6 @@ namespace Vectora {
 
 	using AllComponents =
 		ComponentGroup<TransformComponent, SpriteRendererComponent,
-		CircleRendererComponent, CameraComponent, NativeScriptComponent,
+		CircleRendererComponent, CameraComponent, ScriptComponent, NativeScriptComponent,
 		Rigidbody2DComponent, BoxCollider2DComponent, CircleCollider2DComponent>;
 }
