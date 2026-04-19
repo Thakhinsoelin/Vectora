@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Core/Core.h"
 #include "Core/Window.h"
 #include "Core/LayerStack.h"
@@ -22,7 +23,7 @@ int main(int argc, char** argv);
 namespace Vectora {
 	struct ApplicationSpecification
 	{
-		std::string Name = "Hazel Application";
+		std::string Name = "Vectora Application";
 		std::string WorkingDirectory;
 	};
 
