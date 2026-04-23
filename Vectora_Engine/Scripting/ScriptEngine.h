@@ -33,7 +33,7 @@ namespace Vectora {
 	{
 	public:
 		ScriptInstance() {};
-		ScriptInstance(Ref<ScriptClass> scriptClass);
+		ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity);
 
 		void InvokeOnCreate();
 		void InvokeOnUpdate(float ts);
@@ -55,6 +55,9 @@ namespace Vectora {
 		static void OnRuntimeStop();
 
 		static void OnCreateEntity(Entity entity);
+		static void OnUpdateEntity(Entity entity, Timestep ts);
+
+		static Scene* GetSceneContext();
 
 		static bool EntityClassExists(const std::string& fullClassName) ;
 		static std::unordered_map<std::string, Ref<ScriptClass>> GetEntityClasses();

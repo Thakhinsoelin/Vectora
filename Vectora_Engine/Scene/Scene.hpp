@@ -21,6 +21,7 @@ namespace Vectora {
 
 		Entity CreateEntity(const std::string& name = std::string());
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
+		Entity GetEntityByUUID(UUID uuid);
 		void DestroyEntity(Entity entity);
 
 		void OnRuntimeStart();
@@ -55,7 +56,7 @@ namespace Vectora {
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
 		b2WorldId m_PhysicsWorld;
-
+		std::unordered_map<UUID, entt::entity> m_EntityMap;
 		friend class Entity;
 		friend class SceneSerializer;
 		friend class SceneHirearchyPanel;

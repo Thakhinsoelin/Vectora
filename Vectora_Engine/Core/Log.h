@@ -10,7 +10,7 @@
 #pragma warning(pop)
 
 #include <spdlog/fmt/bundled/format.h> // Ensure we have the fmt header
-
+#include "Core/UUID.h"
 // This tells fmt how to handle any GLM vector or matrix
 template<typename T, glm::length_t L, glm::qualifier Q>
 struct fmt::formatter<glm::vec<L, T, Q>> : fmt::ostream_formatter {};
@@ -20,6 +20,9 @@ struct fmt::formatter<glm::mat<C, R, T, Q>> : fmt::ostream_formatter {};
 
 template<typename T, glm::qualifier Q>
 struct fmt::formatter<glm::qua<T, Q>> : fmt::ostream_formatter {};
+
+template<>
+struct fmt::formatter<Vectora::UUID> : fmt::ostream_formatter {};
 
 namespace Vectora {
 	class VECTORA_API Log
@@ -50,6 +53,11 @@ template<typename OStream, glm::length_t C, glm::length_t R, typename T, glm::qu
 inline OStream& operator<<(OStream& os, const glm::mat<C, R, T, Q>& matrix)
 {
 	return os << glm::to_string(matrix);
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Vectora::UUID& uuid)
+{
+	return os << (uint64_t)uuid;
 }
 
 template<typename OStream, typename T, glm::qualifier Q>

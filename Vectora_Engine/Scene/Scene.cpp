@@ -127,12 +127,24 @@ namespace Vectora {
 		entity.AddComponent<TransformComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
+		m_EntityMap[uuid] = entity;
+
 		return entity;
+	}
+
+	Entity Scene::GetEntityByUUID(UUID uuid)
+	{
+		if (m_EntityMap.find(uuid) != m_EntityMap.end())
+		{
+			return Entity{ m_EntityMap.at(uuid), this};
+		}
+		return {};
 	}
 
 	void Scene::DestroyEntity(Entity entity)
 	{
 		m_Registry.destroy(entity);
+		m_EntityMap.erase(entity.GetUUID());
 	}
 
 	void Scene::OnRuntimeStart()
@@ -171,9 +183,19 @@ namespace Vectora {
 	}
 
 	void Scene::OnUpdateRuntime(Timestep ts)
-	{
-
+	{	
+		// Scripting 
+		
 		{
+			// C# Entity OnUpdate
+			auto view = m_Registry.view<ScriptComponent>();
+			for (auto& e : view) {
+				Entity entity = { e, this };
+				ScriptEngine::OnUpdateEntity(entity, ts);
+
+			}
+		
+
 			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc) {
 
 				if (!nsc.Instance) {

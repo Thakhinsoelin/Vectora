@@ -144,8 +144,8 @@ namespace Vectora {
 		ScriptGlue::RegisterFunctions();
 
 		//MonoObject* instance = s_Data->EntityClass
-#if alskdfasd
 		s_Data->EntityClass = ScriptClass("Vectora", "Entity");
+#if alskdfasd
 		MonoObject* instance = s_Data->EntityClass.Instantiate();
 
 		int value = 5;
@@ -201,6 +201,7 @@ namespace Vectora {
 	void ScriptEngine::OnRuntimeStop()
 	{
 		s_Data->SceneContext = nullptr;
+		s_Data->EntityInstances.clear();
 	}
 	void ScriptEngine::OnCreateEntity(Entity entity)
 	{
@@ -208,12 +209,25 @@ namespace Vectora {
 
 		if (ScriptEngine::EntityClassExists(sc.ClassName))
 		{
-			Ref<ScriptInstance> instance = CreateRef<ScriptInstance>(s_Data->EntityClasses[sc.ClassName]);
+			Ref<ScriptInstance> instance = CreateRef<ScriptInstance>(s_Data->EntityClasses[sc.ClassName], entity);
 			s_Data->EntityInstances[entity.GetUUID()] = instance;
 
 			instance->InvokeOnCreate();
 				
 		}
+	}
+	void ScriptEngine::OnUpdateEntity(Entity entity, Timestep ts)
+	{
+		UUID entityID = entity.GetUUID();
+		VE_CORE_ASSERT(s_Data->EntityInstances.find(entity.GetUUID()) != s_Data->EntityInstances.end());
+		
+		Ref<ScriptInstance> instance = s_Data->EntityInstances[entityID];
+		instance->InvokeOnUpdate((float)ts);
+		
+	}
+	Scene* ScriptEngine::GetSceneContext()
+	{
+		return s_Data->SceneContext;
 	}
 	bool ScriptEngine::EntityClassExists(const std::string& fullClassName)
 	{
@@ -252,13 +266,20 @@ namespace Vectora {
 		return mono_runtime_invoke(method, instance, params, nullptr);
 	}
 	
-	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass)
+	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity)
 		:m_ScriptClass(scriptClass)
 	{
 		m_Instance = scriptClass -> Instantiate();
 
+		m_Constructor = s_Data->EntityClass.GetMethod(".ctor", 1);
 		m_OnCreateMethod = m_ScriptClass->GetMethod("OnCreate", 0);
 		m_OnUpdateMethod = m_ScriptClass->GetMethod("OnUpdate", 1);
+
+		{
+			UUID entityID = entity.GetUUID();
+			void* param = &entityID;
+			m_ScriptClass->InvokeMethod(m_Instance, m_Constructor, &param);
+		}
 	}
 	void ScriptInstance::InvokeOnUpdate(float ts)
 	{
