@@ -23,14 +23,14 @@ namespace Sandbox
             float speed = 1.0f;
             Vector3 velocity = Vector3.Zero;
 
-            if(Input.IsKeyDown(KeyCodes.VE_KEY_W))
+            if(Input.IsKeyDown(KeyCodes.W))
                 velocity.Y += 1.0f;
-            else if(Input.IsKeyDown(KeyCodes.VE_KEY_S))
+            else if(Input.IsKeyDown(KeyCodes.S))
                 velocity.Y -= 1.0f;
 
-            if (Input.IsKeyDown(KeyCodes.VE_KEY_A))
+            if (Input.IsKeyDown(KeyCodes.A))
                 velocity.X += 1.0f;
-            else if (Input.IsKeyDown(KeyCodes.VE_KEY_D))
+            else if (Input.IsKeyDown(KeyCodes.D))
                 velocity.X -= 1.0f;
 
             velocity *= speed;
@@ -40,6 +40,7 @@ namespace Sandbox
         }
 
         // had to add this so visual studio don't gray out the methods above, since they are called from native code
+ 
         void do_nothing()
         {
             OnCreate();
