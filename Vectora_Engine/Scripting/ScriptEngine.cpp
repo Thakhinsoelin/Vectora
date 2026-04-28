@@ -141,25 +141,13 @@ namespace Vectora {
 		InitMono();
 		LoadAssembly("Vectora-ScriptCore.dll");
 		LoadAssemblyClasses(s_Data->CoreAssembly);
+
+		ScriptGlue::RegisterComponents();
 		ScriptGlue::RegisterFunctions();
 
 		//MonoObject* instance = s_Data->EntityClass
 		s_Data->EntityClass = ScriptClass("Vectora", "Entity");
-#if alskdfasd
-		MonoObject* instance = s_Data->EntityClass.Instantiate();
 
-		int value = 5;
-		void* param = &value;
-		void* args[] = { &value };
-		MonoMethod* printMessageInt = s_Data->EntityClass.GetMethod("PrintCustomInt", 1);
-		s_Data->EntityClass.InvokeMethod(instance, printMessageInt, args);
-
-		MonoString* monoString = mono_string_new(s_Data->AppDomain, "Hello from C++");
-		void* stringArgs[] = { monoString };
-		MonoMethod* printCustomMessage = s_Data->EntityClass.GetMethod("PrintCustomMessage", 1);
-		s_Data->EntityClass.InvokeMethod(instance, printCustomMessage, stringArgs);
-
-#endif
 	}
 	void ScriptEngine::Shutdown()
 	{
@@ -213,7 +201,6 @@ namespace Vectora {
 			s_Data->EntityInstances[entity.GetUUID()] = instance;
 
 			instance->InvokeOnCreate();
-				
 		}
 	}
 	void ScriptEngine::OnUpdateEntity(Entity entity, Timestep ts)
@@ -224,6 +211,10 @@ namespace Vectora {
 		Ref<ScriptInstance> instance = s_Data->EntityInstances[entityID];
 		instance->InvokeOnUpdate((float)ts);
 		
+	}
+	MonoImage* ScriptEngine::GetCoreAssemblyImage()
+	{
+		return s_Data->CoreAssemblyImage;
 	}
 	Scene* ScriptEngine::GetSceneContext()
 	{
@@ -283,12 +274,14 @@ namespace Vectora {
 	}
 	void ScriptInstance::InvokeOnUpdate(float ts)
 	{
-		int value = 1;
 		void* param = &ts;
-		m_ScriptClass->InvokeMethod(m_Instance, m_OnUpdateMethod, &param);
+
+		if(m_OnUpdateMethod)
+			m_ScriptClass->InvokeMethod(m_Instance, m_OnUpdateMethod, &param);
 	}
 	void ScriptInstance::InvokeOnCreate()
 	{
-		m_ScriptClass->InvokeMethod(m_Instance, m_OnCreateMethod);
+		if(m_OnCreateMethod)
+			m_ScriptClass->InvokeMethod(m_Instance, m_OnCreateMethod);
 	}
 }

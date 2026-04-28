@@ -57,6 +57,7 @@ namespace Vectora {
 		static void OnCreateEntity(Entity entity);
 		static void OnUpdateEntity(Entity entity, Timestep ts);
 
+		static MonoImage* GetCoreAssemblyImage();
 		static Scene* GetSceneContext();
 
 		static bool EntityClassExists(const std::string& fullClassName) ;

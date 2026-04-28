@@ -17,6 +17,9 @@
 #include <box2d/types.h>
 #include <box2d/id.h>
 
+#include <string>
+#include <filesystem>
+
 namespace Vectora {
 	struct IDComponent
 	{
@@ -29,7 +32,7 @@ namespace Vectora {
 		IDComponent(const UUID& id) : ID(id) {}
 	};
 
-	struct TagComponent 
+	struct TagComponent
 	{
 		std::string Tag;
 		TagComponent() = default;
@@ -131,7 +134,7 @@ namespace Vectora {
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		glm::vec2 Size = { 0.5f, 0.5f };
 
-		// TODO(Yan): move into physics material in the future maybe
+		// TODO: move into physics material in the future maybe
 		float Density = 1.0f;
 		float Friction = 0.5f;
 		float Restitution = 0.0f;

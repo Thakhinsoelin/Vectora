@@ -8,6 +8,15 @@
 
         public static Vector3 Zero => new Vector3(0, 0, 0);
 
+        public Vector2 XY
+        {
+            get => new Vector2(X, Y);
+            set
+            {
+                X = value.X;
+                Y = value.Y;
+            }
+        }
         public Vector3(float scalar)
         {
             X = scalar;
