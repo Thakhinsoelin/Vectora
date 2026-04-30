@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.28)
 project(Vectora LANGUAGES C CXX)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-add_subdirectory(Vectora-ScriptCore)
 
+
+add_subdirectory(Vectora-ScriptCore)
+add_subdirectory(Vectora_Editor/SandboxProj/Assets/Scripts)
 
 set(VE_ENGINE_TARGET Vectora_Engine)
 set(VE_SANDBOX_TARGET Sandbox)
@@ -205,7 +207,7 @@ set(EDITOR ${INTERNAL_EDITOR_SOURCES} ${IMGUIZMO_SOURCES})
 set(SANDBOX ${INTERNAL_SANDBOX_SOURCES})
 
 add_library(${VE_ENGINE_TARGET} STATIC ${ENGINE})
-add_dependencies(${VE_ENGINE_TARGET} imgui_static yaml-cpp box2d Vectora-ScriptCore)
+add_dependencies(${VE_ENGINE_TARGET} imgui_static yaml-cpp box2d Vectora-ScriptCore Sandbox-Scripts)
 # Include your own headers
 target_include_directories(${VE_ENGINE_TARGET} PUBLIC
     ${imguizmo_SOURCE_DIR}

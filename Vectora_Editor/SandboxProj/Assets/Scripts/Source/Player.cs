@@ -11,6 +11,7 @@ namespace Sandbox
         void OnCreate()
         {
             Console.WriteLine($"Player.Oncreate - id {ID}");
+            Console.WriteLine("testing");
             m_transform = GetComponent<TransformComponent>();
             m_Rigidbody = GetComponent<Rigidbody2DComponent>();
             m_transform.Translation = new Vector3(0.0f);
