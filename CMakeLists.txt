@@ -164,10 +164,12 @@ set_target_properties(yaml-cpp-read PROPERTIES FOLDER "Dependencies")
 set_target_properties(yaml-cpp-sandbox PROPERTIES FOLDER "Dependencies")
 set_target_properties(box2d PROPERTIES FOLDER "Dependencies")
 
-
-file(GLOB_RECURSE ENGINE CONFIGURE_DEPENDS
+set(IMGUIZMO_SOURCES
     ${imguizmo_SOURCE_DIR}/ImGuizmo.h
     ${imguizmo_SOURCE_DIR}/ImGuizmo.cpp
+)
+
+file(GLOB_RECURSE INTERNAL_ENGINE_SOURCES CONFIGURE_DEPENDS
     Vectora_Engine/*.cpp
     Vectora_Engine/*.c
     Vectora_Engine/*.h
@@ -175,21 +177,32 @@ file(GLOB_RECURSE ENGINE CONFIGURE_DEPENDS
     Vectora_Engine/*.glsl # adding the glsl files to your target makes cmake also track that files so after the shader gets modified, cmake generation gets triggered again
 )
 
-file(GLOB_RECURSE EDITOR CONFIGURE_DEPENDS
-    ${imguizmo_SOURCE_DIR}/ImGuizmo.h
-    ${imguizmo_SOURCE_DIR}/ImGuizmo.cpp
+file(GLOB_RECURSE INTERNAL_EDITOR_SOURCES CONFIGURE_DEPENDS
     Vectora_Editor/*.cpp
     Vectora_Editor/*.c
     Vectora_Editor/*.h
     Vectora_Editor/*.hpp
 )
 
-file(GLOB_RECURSE SANDBOX CONFIGURE_DEPENDS
+file(GLOB_RECURSE INTERNAL_SANDBOX_SOURCES CONFIGURE_DEPENDS
     Sandbox/*.cpp
     Sandbox/*.c
     Sandbox/*.h
     Sandbox/*.hpp
 )
+
+# --- 3. Apply the Tree Folders ONLY to Internal Files ---
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Vectora_Engine" PREFIX "Source Files" FILES ${INTERNAL_ENGINE_SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Vectora_Editor" PREFIX "Source Files" FILES ${INTERNAL_EDITOR_SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Sandbox" PREFIX "Source Files" FILES ${INTERNAL_SANDBOX_SOURCES})
+
+# --- 4. Handle External Files Separately ---
+# This puts ImGuizmo into its own folder so it doesn't clutter your source tree
+source_group("Dependencies\\ImGuizmo" FILES ${IMGUIZMO_SOURCES})
+
+set(ENGINE ${INTERNAL_ENGINE_SOURCES} ${IMGUIZMO_SOURCES})
+set(EDITOR ${INTERNAL_EDITOR_SOURCES} ${IMGUIZMO_SOURCES})
+set(SANDBOX ${INTERNAL_SANDBOX_SOURCES})
 
 add_library(${VE_ENGINE_TARGET} STATIC ${ENGINE})
 add_dependencies(${VE_ENGINE_TARGET} imgui_static yaml-cpp box2d Vectora-ScriptCore)
