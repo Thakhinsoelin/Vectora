@@ -43,6 +43,7 @@ namespace Vectora {
 		{
 			return m_Registry.view<Components...>();
 		}
+		bool IsRunning() const { return m_IsRunning; }
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
@@ -54,7 +55,7 @@ namespace Vectora {
 	private:
 		entt::registry m_Registry;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
-
+		bool m_IsRunning = false;
 		b2WorldId m_PhysicsWorld;
 		std::unordered_map<UUID, entt::entity> m_EntityMap;
 		friend class Entity;

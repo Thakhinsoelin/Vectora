@@ -149,6 +149,7 @@ namespace Vectora {
 
 	void Scene::OnRuntimeStart()
 	{
+		m_IsRunning = true;
 		OnPhysics2DStart();
 		{
 			ScriptEngine::OnRuntimeStart(this);
@@ -164,6 +165,7 @@ namespace Vectora {
 
 	void Scene::OnRuntimeStop()
 	{
+		m_IsRunning = false;
 		OnPhysics2DStop();
 		{
 			ScriptEngine::OnRuntimeStop();
