@@ -1,33 +1,12 @@
 Scene: Untitled
 Entities:
-  - Entity: 442774925821405256
-    TagComponent:
-      Tag: Empty Entity
-    TransformComponent:
-      Translation: [2.2173767, 1.135256, 0]
-      Rotation: [0, 0, 1.8099704]
-      Scale: [1.0000001, 1.0000001, 1]
-    CircleRendererComponent:
-      Color: [0.9034749, 0.32760575, 0.0209299, 1]
-      Thickness: 1
-      Fade: 0.005
-    Rigidbody2DComponent:
-      BodyType: Dynamic
-      FixedRotation: false
-    CircleCollider2DComponent:
-      Offset: [0, 0]
-      Radius: 0.5
-      Density: 1
-      Friction: 0.5
-      Restitution: 0
-      RestitutionThreshold: 0.5
-  - Entity: 5134011587522944740
+  - Entity: 16672940118998907085
     TagComponent:
       Tag: Floor
     TransformComponent:
-      Translation: [2.3506453, -1.8453996, 0]
-      Rotation: [0, 0, 0.60402507]
-      Scale: [6.7419696, 0.46067816, 1]
+      Translation: [-0.8831757, -1.0944793, 0]
+      Rotation: [0, 0, -0.63925743]
+      Scale: [6.7419677, 0.46067813, 1]
     SpriteRendererComponent:
       Color: [0.9498069, 0.4553014, 0.06600974, 1]
       Texture: ""
@@ -40,28 +19,6 @@ Entities:
       Density: 1
       Friction: 0.5
       Restitution: 0
-      RestitutionThreshold: 0.5
-  - Entity: 15045535320033348975
-    TagComponent:
-      Tag: Sprite
-    TransformComponent:
-      Translation: [-0.096012086, 1.3406142, 0.02251478]
-      Rotation: [0, 0, 0.93144524]
-      Scale: [0.3611597, 0.37557206, 0.84813577]
-    ScriptComponent:
-      ClassName: Sandbox.Player
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-      Texture: ""
-    Rigidbody2DComponent:
-      BodyType: Dynamic
-      FixedRotation: false
-    BoxCollider2DComponent:
-      Offset: [0, 0]
-      Size: [0.5, 0.5]
-      Density: 0.88
-      Friction: 0.1
-      Restitution: 0.82
       RestitutionThreshold: 0.5
   - Entity: 4793924497264767156
     TagComponent:
@@ -83,13 +40,41 @@ Entities:
       FixedAspectRatio: false
     ScriptComponent:
       ClassName: Sandbox.Camera
-  - Entity: 16672940118998907085
+      ScriptFields:
+        []
+  - Entity: 15045535320033348975
+    TagComponent:
+      Tag: Sprite
+    TransformComponent:
+      Translation: [-0.096012086, 1.3406142, 0.02251478]
+      Rotation: [0, 0, 0.93144524]
+      Scale: [0.3611597, 0.37557206, 0.84813577]
+    ScriptComponent:
+      ClassName: Sandbox.Player
+      ScriptFields:
+        - Name: Speed
+          Type: Float
+          Data: 5
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      Texture: ""
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 0.88
+      Friction: 0.1
+      Restitution: 0.82
+      RestitutionThreshold: 0.5
+  - Entity: 5134011587522944740
     TagComponent:
       Tag: Floor
     TransformComponent:
-      Translation: [-0.8831757, -1.0944793, 0]
-      Rotation: [0, 0, -0.63925743]
-      Scale: [6.7419677, 0.46067813, 1]
+      Translation: [2.3506453, -1.8453996, 0]
+      Rotation: [0, 0, 0.60402507]
+      Scale: [6.7419696, 0.46067816, 1]
     SpriteRendererComponent:
       Color: [0.9498069, 0.4553014, 0.06600974, 1]
       Texture: ""
@@ -99,6 +84,27 @@ Entities:
     BoxCollider2DComponent:
       Offset: [0, 0]
       Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 442774925821405256
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [2.2173767, 1.135256, 0]
+      Rotation: [0, 0, 1.8099704]
+      Scale: [1.0000001, 1.0000001, 1]
+    CircleRendererComponent:
+      Color: [0.9034749, 0.32760575, 0.0209299, 1]
+      Thickness: 1
+      Fade: 0.005
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+    CircleCollider2DComponent:
+      Offset: [0, 0]
+      Radius: 0.5
       Density: 1
       Friction: 0.5
       Restitution: 0

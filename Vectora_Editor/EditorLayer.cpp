@@ -253,7 +253,7 @@ namespace Vectora {
 
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
-		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
+		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportHovered);
 
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
@@ -493,7 +493,9 @@ namespace Vectora {
 
 	void EditorLayer::SaveSceneAs()
 	{
-		std::optional<std::string> filepath = FileDialogs::SaveFile("Vectora Scene (*.vectora)\0*.vectora\0");
+
+		std::string currentSceneName = m_EditorScenePath.string();
+		std::optional<std::string> filepath = FileDialogs::SaveFile("Vectora Scene (*.vectora)\0*.vectora\0", currentSceneName);
 		if (filepath.has_value())
 		{
 			SerializeScene(m_ActiveScene, filepath.value());

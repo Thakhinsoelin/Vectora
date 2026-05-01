@@ -30,15 +30,25 @@ namespace Vectora {
 		return std::nullopt;
 	}
 
-	std::optional<std::string> FileDialogs::SaveFile(const char* filter)
+	std::optional<std::string> FileDialogs::SaveFile(const char* filter, const std::string& defaultName)
 	{
 		OPENFILENAMEA ofn;
 		CHAR currentDir[256] = { 0 };
+
+		CHAR szFile[260] = { 0 };
+
+		// --- The Fix ---
+		// Copy the active scene name into the buffer so the dialog shows it immediately
+		if (!defaultName.empty())
+		{
+			strncpy_s(szFile, defaultName.c_str(), sizeof(szFile) - 1);
+		}
+
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
 		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());
-		ofn.lpstrFile = currentDir;
-		ofn.nMaxFile = sizeof(currentDir);
+		ofn.lpstrFile = szFile;
+		ofn.nMaxFile = sizeof(szFile);
 		if (GetCurrentDirectoryA(256, currentDir))
 			ofn.lpstrInitialDir = currentDir;
 		ofn.lpstrFilter = filter;
@@ -48,9 +58,9 @@ namespace Vectora {
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR;
 		if (GetSaveFileNameA(&ofn) == TRUE)
 		{
-			return ofn.lpstrFile;
+			return std::string(ofn.lpstrFile);
 		}
-		return std::string();
+		return std::nullopt;
 	}
 	std::string FileDialogs::GetExecutablePath()
 	{
