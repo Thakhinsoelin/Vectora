@@ -94,12 +94,34 @@ namespace Vectora {
 		b2Body_ApplyLinearImpulseToCenter(rb2d.RuntimeBody, b2Vec2{ impulse->x, impulse->y }, true);
 	}
 
+	static uint64_t Entity_FindEntityByName(MonoString* name)
+	{
+		char* nameCStr = mono_string_to_utf8(name);
+
+		Scene* scene = ScriptEngine::GetSceneContext();
+		VE_CORE_ASSERT(scene);
+		Entity entity = scene->FindEntityByName(nameCStr);
+		mono_free(nameCStr);
+
+		if (!entity)
+			return 0;
+
+		return entity.GetUUID();
+	}
+
+	static MonoObject* GetScriptInstance(UUID entityID)
+	{
+		return ScriptEngine::GetManagedInstance(entityID);
+	}
+
 	void ScriptGlue::RegisterFunctions()
 	{
 		VE_ADD_INTERNAL_CALLS(NativeLogV3);
 		VE_ADD_INTERNAL_CALLS(TransformComponent_GetTranslation);
 		VE_ADD_INTERNAL_CALLS(TransformComponent_SetTranslation);
 		VE_ADD_INTERNAL_CALLS(Entity_HasComponent);
+		VE_ADD_INTERNAL_CALLS(Entity_FindEntityByName);
+		VE_ADD_INTERNAL_CALLS(GetScriptInstance);
 
 		VE_ADD_INTERNAL_CALLS(Rigidbody2DComponent_ApplyLinearImpulse);
 		VE_ADD_INTERNAL_CALLS(Rigidbody2DComponent_ApplyLinearImpulseToCenter);
