@@ -3,8 +3,6 @@ project(Vectora LANGUAGES C CXX)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 
-add_subdirectory(Vectora-ScriptCore)
-add_subdirectory(Vectora_Editor/SandboxProj/Assets/Scripts)
 
 set(VE_ENGINE_TARGET Vectora_Engine)
 set(VE_SANDBOX_TARGET Sandbox)
@@ -167,8 +165,8 @@ set_target_properties(yaml-cpp-sandbox PROPERTIES FOLDER "Dependencies")
 set_target_properties(box2d PROPERTIES FOLDER "Dependencies")
 
 set(IMGUIZMO_SOURCES
-    ${imguizmo_SOURCE_DIR}/ImGuizmo.h
-    ${imguizmo_SOURCE_DIR}/ImGuizmo.cpp
+    ${ImGuizmo_SOURCE_DIR}/src/ImGuizmo.h
+    ${ImGuizmo_SOURCE_DIR}/src/ImGuizmo.cpp
 )
 
 file(GLOB_RECURSE INTERNAL_ENGINE_SOURCES CONFIGURE_DEPENDS
@@ -207,7 +205,7 @@ set(EDITOR ${INTERNAL_EDITOR_SOURCES} ${IMGUIZMO_SOURCES})
 set(SANDBOX ${INTERNAL_SANDBOX_SOURCES})
 
 add_library(${VE_ENGINE_TARGET} STATIC ${ENGINE})
-add_dependencies(${VE_ENGINE_TARGET} imgui_static yaml-cpp box2d Vectora-ScriptCore)
+add_dependencies(${VE_ENGINE_TARGET} imgui_static yaml-cpp box2d )
 # Include your own headers
 target_include_directories(${VE_ENGINE_TARGET} PUBLIC
     ${imguizmo_SOURCE_DIR}
@@ -238,7 +236,7 @@ set_target_properties(${VE_ENGINE_TARGET} PROPERTIES
 # Link libraries
 target_link_libraries(${VE_ENGINE_TARGET} PUBLIC
     ${DISCORD_LIB_PATH}
-    ${MONO_STATIC_LIB}           # <--- Mono Static Library
+    ${MONO_STATIC_LIB}           
     # --- Windows System Dependencies for Mono ---
     Bcrypt.lib                   # Cryptography/Hashing
     version.lib                  # File versioning
@@ -338,4 +336,29 @@ add_custom_target(copy_shaders ALL
 
 set_target_properties(copy_shaders PROPERTIES FOLDER "Dependencies")
 
-add_dependencies(${VE_EDITOR_TARGET} copy_shaders) 
+# Define where the C# build folder should live (separate from C++ build)
+set(CSHARP_BUILD_DIR "${CMAKE_BINARY_DIR}/CSharpBuild")
+
+# Create a custom command to generate the C# Solution independently
+add_custom_target(GenerateCSharpSolution
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CSHARP_BUILD_DIR}
+    COMMAND ${CMAKE_COMMAND} 
+        -S "${CMAKE_SOURCE_DIR}/Vectora-ScriptCore" 
+        -B "${CSHARP_BUILD_DIR}/ScriptCore"
+        -DENGINE_BINARY_DIR=${CMAKE_BINARY_DIR}
+        -DCONFIG=$<CONFIG>
+        -DPLATFORM=${ENGINE_PLATFORM}
+    
+    COMMAND ${CMAKE_COMMAND} 
+        -S "${CMAKE_SOURCE_DIR}/Vectora_Editor/SandboxProj/Assets/Scripts" 
+        -B "${CSHARP_BUILD_DIR}/SandboxScripts"
+        -DENGINE_BINARY_DIR=${CMAKE_BINARY_DIR}
+        -DCONFIG=$<CONFIG>
+        -DPLATFORM=${ENGINE_PLATFORM}
+    
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Generating separate C# solutions for Assembly Reloading..."
+)
+
+# Make the Editor depend on this generation
+add_dependencies(${VE_EDITOR_TARGET} copy_shaders GenerateCSharpSolution) 
