@@ -336,26 +336,19 @@ add_custom_target(copy_shaders ALL
 
 set_target_properties(copy_shaders PROPERTIES FOLDER "Dependencies")
 
-# Define where the C# build folder should live (separate from C++ build)
+# Define where the C# build folder lives in your C++ build directory
 set(CSHARP_BUILD_DIR "${CMAKE_BINARY_DIR}/CSharpBuild")
 
-# Create a custom command to generate the C# Solution independently
-add_custom_target(GenerateCSharpSolution
+# Create a single C# solution containing both projects
+add_custom_target(GenerateCSharpSolution ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CSHARP_BUILD_DIR}
     COMMAND ${CMAKE_COMMAND} 
-        -S "${CMAKE_SOURCE_DIR}/Vectora-ScriptCore" 
-        -B "${CSHARP_BUILD_DIR}/ScriptCore"
+        -S "${CMAKE_SOURCE_DIR}/Vectora-ScriptCore" # Points directly to your core folder
+        -B "${CSHARP_BUILD_DIR}"
+        -DCMAKE_SUPPRESS_REGENERATION=ON
         -DENGINE_BINARY_DIR=${CMAKE_BINARY_DIR}
-        -DCONFIG=$<CONFIG>
+        -DCONFIG=Debug
         -DPLATFORM=${ENGINE_PLATFORM}
-    
-    COMMAND ${CMAKE_COMMAND} 
-        -S "${CMAKE_SOURCE_DIR}/Vectora_Editor/SandboxProj/Assets/Scripts" 
-        -B "${CSHARP_BUILD_DIR}/SandboxScripts"
-        -DENGINE_BINARY_DIR=${CMAKE_BINARY_DIR}
-        -DCONFIG=$<CONFIG>
-        -DPLATFORM=${ENGINE_PLATFORM}
-    
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Generating separate C# solutions for Assembly Reloading..."
 )
