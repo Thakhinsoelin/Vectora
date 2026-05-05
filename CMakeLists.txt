@@ -267,6 +267,7 @@ add_executable(${VE_EDITOR_TARGET} ${EDITOR} ${CMAKE_SOURCE_DIR}/Vectora_Editor/
 target_include_directories(${VE_EDITOR_TARGET} PRIVATE
     ${imguizmo_SOURCE_DIR}
     ${DISCORD_SDK_INCLUDE_DIR}
+    "Dependencies/FileWatcher"
     ${CMAKE_SOURCE_DIR}/Vectora_Editor
     ${CMAKE_SOURCE_DIR}/includes/entt
     ${CMAKE_SOURCE_DIR}/includes

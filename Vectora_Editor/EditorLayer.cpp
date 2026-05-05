@@ -11,6 +11,8 @@
 #include "Math/Math.h"
 #include "Scripting/ScriptEngine.h"
 
+#include <FileWatch.h>
+
 namespace Vectora {
 	extern const std::filesystem::path g_AssetPath;
 	EditorLayer::EditorLayer()
