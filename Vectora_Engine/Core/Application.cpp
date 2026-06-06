@@ -58,6 +58,12 @@ namespace Vectora {
 		Renderer::Shutdown();
 	}
 
+	void Application::SubmitToMainThread(const std::function<void()>& func)
+	{
+		std::scoped_lock<std::mutex> lock(m_MainThreadQueueMutex);
+		m_MainThreadQueue.emplace_back(func);
+	}
+
 	void Application::Run()
 	{
 		VE_PROFILE_FUNCTION();
@@ -67,6 +73,7 @@ namespace Vectora {
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
+			ExecuteMainThreadQueue();
 #ifdef SUPPORT_DISCORD
 			m_DiscordManager->Update(timestep);
 			m_DiscordManager->UpdatePresence("Kozen is a nigger", "fuck u");
@@ -90,6 +97,17 @@ namespace Vectora {
 
 			window->OnUpdate();
 		}
+	}
+
+	void Application::ExecuteMainThreadQueue()
+	{
+		std::scoped_lock<std::mutex> lock(m_MainThreadQueueMutex);
+
+		for (auto& func : m_MainThreadQueue)
+		{
+			func();
+		}
+		m_MainThreadQueue.clear();
 	}
 
 	void Application::OnEvent(Event& e)

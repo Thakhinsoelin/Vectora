@@ -38,8 +38,7 @@ namespace Vectora {
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
-		bool OnWindowClosed(WindowCloseEvent& e);
-		bool OnWindowResized(WindowResizeEvent& e);
+		
 		inline Window& GetWindow() { return *window; }
 
 		inline static Application& Get() { return *s_Instance; }
@@ -49,15 +48,25 @@ namespace Vectora {
 			this->m_Running = run;
 		}
 
+		void SubmitToMainThread(const std::function<void()>& func);
+
 		ImGuiLayer* GetImGuiLayer() { return m_ImguiLayer; }
 	private:
 		void Run();
+		void ExecuteMainThreadQueue();
+		bool OnWindowClosed(WindowCloseEvent& e);
+		bool OnWindowResized(WindowResizeEvent& e);
+
+	private:
 		Scope<Window> window;
 		ImGuiLayer* m_ImguiLayer;
 		LayerStack layerstack;
 		bool m_Running = true;
 		bool m_Minimized = false;
 		
+		std::vector<std::function<void()>> m_MainThreadQueue;
+		std::mutex m_MainThreadQueueMutex;
+
 		float m_LastFrameTime = 0.f;
 
 	private:

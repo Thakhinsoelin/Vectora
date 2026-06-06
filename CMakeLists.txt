@@ -95,16 +95,16 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
-    ImGuizmo
-    GIT_REPOSITORY https://github.com/CedricGuillemet/ImGuizmo.git
-    GIT_TAG master # this is a bad idea
-    GIT_SHALLOW TRUE
-)
-
-FetchContent_Declare(
   box2d
   GIT_REPOSITORY https://github.com/erincatto/box2d.git
   GIT_TAG        v3.1.1 # Latest one as i am writing
+)
+
+FetchContent_Declare(
+    assimp
+    GIT_REPOSITORY https://github.com/assimp/assimp.git
+    GIT_TAG v6.0.4
+    GIT_SHALLOW TRUE
 )
 
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -114,7 +114,8 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(BOX2D_BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
 set(BOX2D_BUILD_TESTBED OFF CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(glfw glm spdlog imgui yaml-cpp ImGuizmo box2d)
+FetchContent_MakeAvailable(glfw glm spdlog imgui yaml-cpp box2d assimp)
+
 get_property(glfwTargets
     DIRECTORY ${glfw_BINARY_DIR}
     PROPERTY BUILDSYSTEM_TARGETS
@@ -130,7 +131,13 @@ foreach(target
     endif()
 endforeach()
 
+set(IMGUIZMO_SOURCES
+    Dependencies/imguizmo/ImGuizmo.h
+    Dependencies/imguizmo/ImGuizmo.cpp
+)
+
 add_library(imgui_static STATIC 
+    ${IMGUIZMO_SOURCES}
     ${imgui_SOURCE_DIR}/imgui.cpp
     ${imgui_SOURCE_DIR}/imgui_demo.cpp
     ${imgui_SOURCE_DIR}/imgui_draw.cpp
@@ -139,6 +146,8 @@ add_library(imgui_static STATIC
     ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
 )
+
+
 
 target_include_directories(imgui_static PUBLIC
     ${imgui_SOURCE_DIR}
@@ -164,10 +173,7 @@ set_target_properties(yaml-cpp-read PROPERTIES FOLDER "Dependencies")
 set_target_properties(yaml-cpp-sandbox PROPERTIES FOLDER "Dependencies")
 set_target_properties(box2d PROPERTIES FOLDER "Dependencies")
 
-set(IMGUIZMO_SOURCES
-    ${ImGuizmo_SOURCE_DIR}/src/ImGuizmo.h
-    ${ImGuizmo_SOURCE_DIR}/src/ImGuizmo.cpp
-)
+
 
 file(GLOB_RECURSE INTERNAL_ENGINE_SOURCES CONFIGURE_DEPENDS
     Vectora_Engine/*.cpp
@@ -190,7 +196,7 @@ file(GLOB_RECURSE INTERNAL_SANDBOX_SOURCES CONFIGURE_DEPENDS
     Sandbox/*.h
     Sandbox/*.hpp
 )
-
+message("niggr")
 # --- 3. Apply the Tree Folders ONLY to Internal Files ---
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Vectora_Engine" PREFIX "Source Files" FILES ${INTERNAL_ENGINE_SOURCES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Vectora_Editor" PREFIX "Source Files" FILES ${INTERNAL_EDITOR_SOURCES})
@@ -200,8 +206,8 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Sandbox" PREFIX "Source Files" FI
 # This puts ImGuizmo into its own folder so it doesn't clutter your source tree
 source_group("Dependencies\\ImGuizmo" FILES ${IMGUIZMO_SOURCES})
 
-set(ENGINE ${INTERNAL_ENGINE_SOURCES} ${IMGUIZMO_SOURCES})
-set(EDITOR ${INTERNAL_EDITOR_SOURCES} ${IMGUIZMO_SOURCES})
+set(ENGINE ${INTERNAL_ENGINE_SOURCES} )#${IMGUIZMO_SOURCES})
+set(EDITOR ${INTERNAL_EDITOR_SOURCES} )#${IMGUIZMO_SOURCES})
 set(SANDBOX ${INTERNAL_SANDBOX_SOURCES})
 
 add_library(${VE_ENGINE_TARGET} STATIC ${ENGINE})
@@ -211,6 +217,8 @@ target_include_directories(${VE_ENGINE_TARGET} PUBLIC
     ${imguizmo_SOURCE_DIR}
     ${DISCORD_SDK_INCLUDE_DIR}
     ${MONO_INCLUDE_DIR}
+    "Dependencies/FileWatcher/"
+    "Dependencies/imguizmo"
     ${CMAKE_SOURCE_DIR}/Vectora_Engine
     ${CMAKE_SOURCE_DIR}/includes/entt
     ${CMAKE_SOURCE_DIR}/includes
@@ -252,6 +260,7 @@ target_link_libraries(${VE_ENGINE_TARGET} PUBLIC
     spdlog::spdlog
     OpenGL::GL
     box2d
+    assimp
 ) # // BREAKPOINT
 
 target_include_directories(${VE_ENGINE_TARGET} SYSTEM PRIVATE
@@ -268,6 +277,7 @@ target_include_directories(${VE_EDITOR_TARGET} PRIVATE
     ${imguizmo_SOURCE_DIR}
     ${DISCORD_SDK_INCLUDE_DIR}
     "Dependencies/FileWatcher"
+    "Dependencies/imguizmo"
     ${CMAKE_SOURCE_DIR}/Vectora_Editor
     ${CMAKE_SOURCE_DIR}/includes/entt
     ${CMAKE_SOURCE_DIR}/includes
@@ -278,7 +288,7 @@ set_target_properties(${VE_EDITOR_TARGET} PROPERTIES
 )
 
 target_compile_definitions(${VE_EDITOR_TARGET} PRIVATE VE_BUILD_STATIC VE_PLATFORM_WINDOWS)
-target_link_libraries(${VE_EDITOR_TARGET} PUBLIC ${VE_ENGINE_TARGET} ${DISCORD_LIB_PATH})
+target_link_libraries(${VE_EDITOR_TARGET} PUBLIC ${VE_ENGINE_TARGET} ${DISCORD_LIB_PATH} assimp)
 
 add_executable(${VE_SANDBOX_TARGET} ${SANDBOX})
 target_include_directories(${VE_SANDBOX_TARGET} PRIVATE
@@ -295,7 +305,7 @@ set_target_properties(${VE_SANDBOX_TARGET} PROPERTIES
 )
 
 target_compile_definitions(${VE_SANDBOX_TARGET} PRIVATE VE_BUILD_STATIC VE_PLATFORM_WINDOWS)
-target_link_libraries(${VE_SANDBOX_TARGET} PUBLIC ${VE_ENGINE_TARGET} ${DISCORD_LIB_PATH})
+target_link_libraries(${VE_SANDBOX_TARGET} PUBLIC ${VE_ENGINE_TARGET} ${DISCORD_LIB_PATH} assimp)
 
 
 
@@ -356,3 +366,4 @@ add_custom_target(GenerateCSharpSolution ALL
 
 # Make the Editor depend on this generation
 add_dependencies(${VE_EDITOR_TARGET} copy_shaders GenerateCSharpSolution) 
+add_dependencies(${VE_SANDBOX_TARGET} copy_shaders GenerateCSharpSolution) 

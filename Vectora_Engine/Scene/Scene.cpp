@@ -187,55 +187,57 @@ namespace Vectora {
 	void Scene::OnUpdateRuntime(Timestep ts)
 	{	
 		// Scripting 
-		
+		if(!m_IsPaused || m_StepFrames-- >0)
 		{
-			// C# Entity OnUpdate
-			auto view = m_Registry.view<ScriptComponent>();
-			for (auto& e : view) {
-				Entity entity = { e, this };
-				ScriptEngine::OnUpdateEntity(entity, ts);
+			{
+				// C# Entity OnUpdate
+				auto view = m_Registry.view<ScriptComponent>();
+				for (auto& e : view) {
+					Entity entity = { e, this };
+					ScriptEngine::OnUpdateEntity(entity, ts);
 
-			}
-		
-
-			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc) {
-
-				if (!nsc.Instance) {
-					nsc.Instance = nsc.InstantiateScript();
-					nsc.Instance->m_Entity = Entity{ entity, this };
-
-					nsc.Instance->OnCreate();
 				}
 
-			nsc.Instance->OnUpdate(ts);
-			});
-		}
 
-		// Physics
-		{
-			const int32_t velocityIterations = 6;
-			const int32_t positionIterations = 2;
-			const int32_t subStepCount = 4;
-			b2World_Step(m_PhysicsWorld, ts, subStepCount);
+				m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc) {
 
-			// Retrieve transform from Box2D
-			auto view = m_Registry.view<Rigidbody2DComponent>();
-			for (auto e : view)
+					if (!nsc.Instance) {
+						nsc.Instance = nsc.InstantiateScript();
+						nsc.Instance->m_Entity = Entity{ entity, this };
+
+						nsc.Instance->OnCreate();
+					}
+
+					nsc.Instance->OnUpdate(ts);
+					});
+			}
+			// Physics
 			{
-				Entity entity = { e, this };
-				auto& transform = entity.GetComponent<TransformComponent>();
-				auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+				const int32_t velocityIterations = 6;
+				const int32_t positionIterations = 2;
+				const int32_t subStepCount = 4;
+				b2World_Step(m_PhysicsWorld, ts, subStepCount);
 
-				//b2Body* body = (b2Body*)rb2d.RuntimeBody;
-				b2Vec2 position = b2Body_GetPosition(rb2d.RuntimeBody);
-				b2Rot rotation = b2Body_GetRotation(rb2d.RuntimeBody);
-				float angle = b2Rot_GetAngle(rotation);
+				// Retrieve transform from Box2D
+				auto view = m_Registry.view<Rigidbody2DComponent>();
+				for (auto e : view)
+				{
+					Entity entity = { e, this };
+					auto& transform = entity.GetComponent<TransformComponent>();
+					auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
-				transform.Translation.x = position.x;
-				transform.Translation.y = position.y;
-				transform.Rotation.z = angle;
+					//b2Body* body = (b2Body*)rb2d.RuntimeBody;
+					b2Vec2 position = b2Body_GetPosition(rb2d.RuntimeBody);
+					b2Rot rotation = b2Body_GetRotation(rb2d.RuntimeBody);
+					float angle = b2Rot_GetAngle(rotation);
+
+					transform.Translation.x = position.x;
+					transform.Translation.y = position.y;
+					transform.Rotation.z = angle;
+				}
 			}
 		}
+
 
 		CameraC* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
@@ -283,9 +285,6 @@ namespace Vectora {
 				}
 				Renderer2D::EndScene();
 			}
-			/*else {
-				VE_CORE_CRITICAL("No camera found");
-			}*/
 		}
 
 
@@ -294,28 +293,31 @@ namespace Vectora {
 	void Scene::OnUpdateSimulation(Timestep ts, EditorCamera& camera)
 	{
 		// Physics
+		if (!m_IsPaused || m_StepFrames-- > 0)
 		{
-			const int32_t velocityIterations = 6;
-			const int32_t positionIterations = 2;
-			const int32_t subStepCount = 4;
-			b2World_Step(m_PhysicsWorld, ts, subStepCount);
-
-			// Retrieve transform from Box2D
-			auto view = m_Registry.view<Rigidbody2DComponent>();
-			for (auto e : view)
 			{
-				Entity entity = { e, this };
-				auto& transform = entity.GetComponent<TransformComponent>();
-				auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+				const int32_t velocityIterations = 6;
+				const int32_t positionIterations = 2;
+				const int32_t subStepCount = 4;
+				b2World_Step(m_PhysicsWorld, ts, subStepCount);
 
-				//b2Body* body = (b2Body*)rb2d.RuntimeBody;
-				b2Vec2 position = b2Body_GetPosition(rb2d.RuntimeBody);
-				b2Rot rotation = b2Body_GetRotation(rb2d.RuntimeBody);
-				float angle = b2Rot_GetAngle(rotation);
+				// Retrieve transform from Box2D
+				auto view = m_Registry.view<Rigidbody2DComponent>();
+				for (auto e : view)
+				{
+					Entity entity = { e, this };
+					auto& transform = entity.GetComponent<TransformComponent>();
+					auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
-				transform.Translation.x = position.x;
-				transform.Translation.y = position.y;
-				transform.Rotation.z = angle;
+					//b2Body* body = (b2Body*)rb2d.RuntimeBody;
+					b2Vec2 position = b2Body_GetPosition(rb2d.RuntimeBody);
+					b2Rot rotation = b2Body_GetRotation(rb2d.RuntimeBody);
+					float angle = b2Rot_GetAngle(rotation);
+
+					transform.Translation.x = position.x;
+					transform.Translation.y = position.y;
+					transform.Rotation.z = angle;
+				}
 			}
 		}
 
@@ -377,6 +379,11 @@ namespace Vectora {
 		}
 		VE_CORE_TRACE("No primary Camera");
 		return {};
+	}
+
+	void Scene::Step(int frames)
+	{
+		m_StepFrames = frames;
 	}
 
 	void Scene::OnPhysics2DStart()

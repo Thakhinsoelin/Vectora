@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.AccessControl;
 using Vectora;
 
 namespace Sandbox
@@ -14,7 +13,7 @@ namespace Sandbox
         void OnCreate()
         {
             Console.WriteLine($"Player.Oncreate - id {ID}");
-            Console.WriteLine("Recompiled version");
+            Console.WriteLine("ReRecompiled version");
             m_transform = GetComponent<TransformComponent>();
             m_Rigidbody = GetComponent<Rigidbody2DComponent>();
             m_transform.Translation = new Vector3(0.0f);
@@ -23,7 +22,7 @@ namespace Sandbox
         void OnUpdate(float ts)
         {
             Time += ts;
-            Console.WriteLine($"Player on update: {ts}");
+            //Console.WriteLine($"Player on update: {ts}");
             float speed = Speed;
             Vector3 velocity = Vector3.Zero;
 

@@ -19,65 +19,24 @@
 class TestLayer : public Vectora::Layer {
 public:
     TestLayer()
-    : Layer("Example"), m_CameraController(1280.f / 720.f, true), m_CubePosition(0.0f)
+    : Layer("Example"), m_EditorCamera(45.0f, 1280.0f / 720.0f, 0.1f, 100.0f)
 	{
-		// Correct way to wrap a factory-created raw pointer into a shared_ptr
-		m_Shader = Vectora::Ref<Vectora::Shader>(Vectora::Shader::Create("shaders/vertex.glsl", "shaders/fragment.glsl"));
-		m_BlueShader = Vectora::Ref<Vectora::Shader>(Vectora::Shader::Create("shaders/blueRect.vertex.glsl", "shaders/blueRect.fragment.glsl"));
+		m_SceneCamera.SetViewportSize(1280.f, 720.f);
+		m_SceneCamera.SetPerspective(glm::radians(45.0f), 0.1f, 1000.0f);
+		m_SceneCamera.SetProjectionType(Vectora::SceneCamera::ProjectionType::Perspective);
+		
 
-		auto textureShader = m_ShaderLibrary.Load("shaders/Texture.vertex.glsl", "shaders/Texture.fragment.glsl");
-		VE_CORE_INFO("Loaded shader: {0}", textureShader->GetName());
-	
-		float vertices[] = {
-			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
-			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
-			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f
-		};
+		m_VikingRoomModel = Vectora::CreateRef<Vectora::Model>("assets/vampire/dancing_vampire.dae");
 
-		m_VertexArray= Vectora::VertexArray::Create();
+		// 2. Load the standalone texture file
+		m_VikingRoomTexture = Vectora::Texture2D::Create("assets/textures/viking_room.png");
+		m_Animation = Vectora::CreateRef<Vectora::SkeAnimation>("assets/vampire/dancing_vampire.dae", m_VikingRoomModel.get());
+		m_Animator = Vectora::CreateRef<Vectora::SkeAnimator>(m_Animation.get());
 
-		Vectora::BufferLayout layout = {
-			{ Vectora::ShaderDataType::Float3, "a_Position" },
-			{ Vectora::ShaderDataType::Float4, "a_Color" }
-		};
-
-		Vectora::Ref<Vectora::VertexBuffer> vertexBuffer;
-		vertexBuffer = Vectora::VertexBuffer::Create(vertices, sizeof(vertices));
-
-		vertexBuffer->SetLayout(layout);
-		m_VertexArray->AddVertexBuffer(vertexBuffer);
-
-		uint32_t indices[3] = { 0, 1, 2 };
-		Vectora::Ref<Vectora::IndexBuffer> indexBuffer;
-		indexBuffer = Vectora::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
-		m_VertexArray->SetIndexBuffer(indexBuffer);
-
-		m_SquareVA = Vectora::VertexArray::Create();
-		float squareVertices[] = {
-			-0.5f, -0.5f, 0.0f, 0.f, 0.f,
-			 0.5f, -0.5f, 0.0f, 1.f, 0.f,
-			 0.5f,  0.5f, 0.0f, 1.f, 1.f,
-			-0.5f,  0.5f, 0.0f, 0.f, 1.f,
-		};
-
-		Vectora::Ref<Vectora::VertexBuffer> squareVB;
-		squareVB = Vectora::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
-		squareVB->SetLayout({
-			{ Vectora::ShaderDataType::Float3, "a_Position" },
-			{ Vectora::ShaderDataType::Float2, "a_TexCoord" }
-		});
-		m_SquareVA->AddVertexBuffer(squareVB);
-
-		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-		Vectora::Ref<Vectora::IndexBuffer> squareIB;
-		squareIB = Vectora::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
-		m_SquareVA->SetIndexBuffer(squareIB);
-
-		m_Texture = Vectora::Texture2D::Create("assets/textures/Checkerboard.png");
-		m_ChernoTexture = Vectora::Texture2D::Create("assets/textures/ChernoLogo.png");
-
-		std::dynamic_pointer_cast<Vectora::OpenGLShader>(textureShader)->Bind();
-		std::dynamic_pointer_cast<Vectora::OpenGLShader>(textureShader)->setInt("u_Texture", 0);
+		m_Animator->PlayAnimation(m_Animation.get());
+		// 3. Package it into your custom material state
+		m_VikingRoomMaterial.DiffuseMap = m_VikingRoomTexture;
+		m_VikingRoomMaterial.Shininess = 16.0f; // Give the wood a slight bounce
     }
 
     void OnImGuiRender() override
@@ -97,49 +56,54 @@ public:
     }
     void OnUpdate(Vectora::Timestep ts) override {
 		this->ts = ts.GetMilliseconds();
-		
-		m_CameraController.OnUpdate(ts);
+		m_Animator->UpdateAnimation(this->ts);
+		// 1. Simple Camera Controls (Optional: Move around with WASD keys if wanted)
+		if (Vectora::Input::IsKeyPressed(Vectora::Key::VE_KEY_A)) m_CameraPosition.x -= 2.0f * ts;
+		if (Vectora::Input::IsKeyPressed(Vectora::Key::VE_KEY_D)) m_CameraPosition.x += 2.0f * ts;
+		if (Vectora::Input::IsKeyPressed(Vectora::Key::VE_KEY_W)) m_CameraPosition.z -= 2.0f * ts;
+		if (Vectora::Input::IsKeyPressed(Vectora::Key::VE_KEY_S)) m_CameraPosition.z += 2.0f * ts;
 
-		Vectora::RenderCommand::SetClearColor({ 0.1, 0.1, 0.1, 1 });
+		m_EditorCamera.OnUpdate(ts);
+
+		Vectora::RenderCommand::SetClearColor({ .2f, .3f, .3f, 1.f });
 		Vectora::RenderCommand::Clear();
+		// 3. Build Camera Transform & View Matrices
+		glm::mat4 cameraTransform = glm::translate(glm::mat4(1.0f), m_CameraPosition);
 
+		// As your note said: inverse it before passing to the renderer!
+		glm::mat4 viewMatrix = glm::inverse(cameraTransform);
 
-		Vectora::Renderer::BeginScence(m_CameraController.GetCamera());
+		// 4. Render Scene
+		Vectora::Renderer3D::BeginScene(m_EditorCamera);
 		
-		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+		// Rotate it so the room sits upright (OBJ models often have Y and Z swapped)
+		glm::mat4 roomTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f))
+			* glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+			* glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
 
-		// should be dynamic cast i think
-		std::static_pointer_cast<Vectora::OpenGLShader>(m_BlueShader)->Bind();
-		std::static_pointer_cast<Vectora::OpenGLShader>(m_BlueShader)->setVec4("u_Color", m_SquareColor);
-		for (int y = 0; y < 20; y++)
-		{
-			for (int x = 0; x < 20; x++)
-			{
-				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos ) * scale;
-				transform = glm::translate(transform, m_CubePosition);
-				transform = glm::rotate(transform, glm::radians(m_CubeRotation), glm::vec3(0.0f, 0.0f, 1.0f));
-				
-				Vectora::Renderer::Submit(m_BlueShader, m_SquareVA, transform);
-			}
-		}
-		auto textureShader = m_ShaderLibrary.Get("Texture");
-		m_Texture->Bind();
-		Vectora::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
-
-		m_ChernoTexture->Bind();
-		Vectora::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
-		// This one is triangle
-		// Vectora::Renderer::Submit(m_Shader, m_VertexArray);
-
-		Vectora::Renderer::EndScene();
+		// DRAW: Pass the override material containing your standalone texture!
+		//Vectora::Renderer3D::DrawModel(roomTransform, m_VikingRoomModel);
+		Vectora::Renderer3D::DrawAnimatedModel(roomTransform, m_VikingRoomModel, *(m_Animator.get()));
+		//m_Animator->PlayAnimation(m_Animation.get());
+		Vectora::Renderer3D::EndScene();
     }
+
+	bool OnWindowResize(Vectora::WindowResizeEvent& event)
+	{
+		if (event.GetWidth() == 0 || event.GetHeight() == 0)
+			return false;
+
+		// Push the new resolution down so the perspective aspect ratio recalculates!
+		m_SceneCamera.SetViewportSize(event.GetWidth(), event.GetHeight());
+		return false;
+	}
 
     void OnEvent(Vectora::Event& event) override {
 		Vectora::EventDispatcher dispatch(event);
 		dispatch.Dispatch<Vectora::KeyPressedEvent>(VE_BIND_EVENT_FN(TestLayer::OnEscapePressed));
-
-		m_CameraController.OnEvent(event);
+		dispatch.Dispatch<Vectora::WindowResizeEvent>(VE_BIND_EVENT_FN(TestLayer::OnWindowResize));
+		
+		m_EditorCamera.OnEvent(event);
     }
 
 	bool OnEscapePressed(Vectora::KeyPressedEvent& event) {
@@ -150,25 +114,20 @@ public:
 		return true;
 	}
 private:
-	Vectora::ShaderLibrary m_ShaderLibrary;
-	Vectora::OrthographicCameraController m_CameraController;
+	Vectora::EditorCamera m_EditorCamera;
+	Vectora::SceneCamera m_SceneCamera;
 
-	Vectora::Ref<Vectora::VertexArray> m_VertexArray;
-	Vectora::Ref<Vectora::Shader> m_Shader;
-					
-	Vectora::Ref<Vectora::VertexArray> m_SquareVA;
-	Vectora::Ref<Vectora::Shader> m_BlueShader;
+	Vectora::Ref<Vectora::SkeAnimation> m_Animation;
+	Vectora::Ref<Vectora::SkeAnimator> m_Animator;
+	Vectora::Ref<Vectora::Model> m_VikingRoomModel;
+	Vectora::Ref<Vectora::Texture2D> m_VikingRoomTexture;
 
+	// The explicit override material to hold the standalone texture
+	Vectora::Material m_VikingRoomMaterial;
 
-	std::string filePath;
+	glm::vec3 m_CameraPosition = { 0.0f, 0.0f, 5.0f }; // Start 5 units back along Z
 
-	glm::vec3 m_CubePosition;
-	float m_CubeMoveSpeed = 10.f;
-	float m_CubeRotation = 0.f;
-	float m_CubeRotationSpeed = 20.f;
-
-	float ts = 0.f;
-	Vectora::Ref<Vectora::Texture2D> m_Texture, m_ChernoTexture;
+	float ts = 0;
 	glm::vec4 m_SquareColor = { 0.3f, 0.2f, 0.8f, 1.f};
 };
 
@@ -176,11 +135,11 @@ class SandBox : public Vectora::Application {
 public:
     SandBox(const Vectora::ApplicationSpecification& spec)
 	: Vectora::Application(spec){
-		//PushLayer(new TestLayer() );
-		//PushLayer(new Sandbox2D());
-		PushLayer(new BackGround());
+		PushLayer(new TestLayer() );
+		
+		/*PushLayer(new BackGround());
 		PushLayer(new TileLayer());
-		PushLayer(new FlappyBird());
+		PushLayer(new FlappyBird());*/
         // SYNC CONTEXT: This prevents the Segfault.
 		// Only turns this on if you were building the core as a dll and linking to your app dynamically.
         /*auto* imguiLayer = (Vectora::ImGuiLayer*)Vectora::ImGuiLayer::GetImguiLayerInstance();

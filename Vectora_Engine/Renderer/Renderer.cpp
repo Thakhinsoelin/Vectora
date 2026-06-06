@@ -1,6 +1,7 @@
 #include "vpch.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/Renderer2D.h"
+#include "Renderer/Renderer3D.h"
 #include "platforms/OpenGL/OpenGLShader.h"
 #include "Debug/Instrumentor.h"
 
@@ -15,10 +16,12 @@ namespace Vectora {
 		VE_PROFILE_FUNCTION();
 		RenderCommand::Init();
 		Renderer2D::Init();
+		Renderer3D::Init();
 	}
 
 	void Renderer::Shutdown() {
-		
+		VE_PROFILE_FUNCTION();
+		Renderer3D::Shutdown();
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
